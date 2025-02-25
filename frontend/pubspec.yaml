@@ -1,0 +1,51 @@
+name: adv_basics
+description: "A Flutter chat application with user authentication, state management, persistent storage, and proper logging."
+publish_to: 'none' # Prevent accidental publishing to pub.dev
+
+version: 1.0.0+1
+
+# Define the Dart SDK version
+environment:
+  sdk: ">=3.7.0 <4.0.0"
+
+# Dependencies required for the project
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Essential packages
+  flutter_svg: ^2.0.4        # SVG image support
+  cupertino_icons: ^1.0.8    # iOS styled icons
+  http: ^1.1.0               # HTTP requests for API communication
+  provider: ^6.1.1           # State management
+  shared_preferences: ^2.2.1 # Local storage for persisting data like tokens
+  logging: ^1.2.0            # For structured logging and better debug practices
+
+# Development dependencies for testing and linting
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0      # Linting rules for better code quality
+
+# Flutter-specific configuration
+flutter:
+  uses-material-design: true  # Enable material design
+
+  # Assets configuration for images and SVGs
+  assets:
+    - assets/chat_bubble.svg
+    - assets/images/noise_texture.png
+    - assets/images/backgroundImage.png
+
+  # Custom fonts configuration
+  fonts:
+    - family: Acme
+      fonts:
+        - asset: assets/fonts/Acme-Regular.ttf
+
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
