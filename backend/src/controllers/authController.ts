@@ -184,3 +184,18 @@ export const getUserData = async (req: Request, res: Response): Promise<void> =>
     res.status(500).json({ message: 'Server error fetching user data' });
   }
 };
+
+
+// Controller function to get all users
+export const getAllUsers = async (req: Request, res: Response) => {
+  try {
+    // Fetch all users from the database
+    const users = await User.findAll({
+      attributes: ['id', 'username', 'displayName', 'profilePicture'], // Specify fields to fetch
+    });
+    res.status(200).json({ users });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ message: 'Server error while fetching users' });
+  }
+};

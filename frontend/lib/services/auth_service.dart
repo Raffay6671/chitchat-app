@@ -187,6 +187,42 @@ static Future<void> fetchUserData(BuildContext context) async {
   }
 }
 
+
+
+// ✅ Fetch All Users API
+static Future<List<Map<String, String>>> fetchAllUsers(BuildContext context) async {
+  try {
+    final accessToken = await getAccessToken();
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/users'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      List<Map<String, String>> users = [];
+      for (var user in data['users']) {
+        users.add({
+          "id": user['id'],
+          "username": user['username'],
+          "displayName": user['displayName'],
+          "profilePicture": user['profilePicture'],
+        });
+      }
+      return users;
+    } else {
+      throw Exception('Failed to fetch users');
+    }
+  } catch (e) {
+    _logger.severe("Fetch All Users Error: $e");
+    return [];
+  }
+}
+
 }
 
 

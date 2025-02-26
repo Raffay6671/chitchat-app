@@ -4,6 +4,7 @@ import { verifyAccessToken } from '../middlewares/authMiddleware'; // ✅ Import
 import { upload } from '../middlewares/uploadMiddleware';
 import { uploadProfilePicture } from '../controllers/authController';
 import { getUserData } from '../controllers/authController';
+import { getAllUsers } from '../controllers/authController';
 
 const router = Router();
 
@@ -41,6 +42,7 @@ router.post('/upload-profile', upload.single('profilePicture'), uploadProfilePic
 
 router.get('/user', verifyAccessToken, getUserData);
 
+router.get('/users', verifyAccessToken, getAllUsers);  // New route to fetch all users
 
 // ✅ Protected route - Requires valid Access Token
 router.get('/protected', verifyAccessToken, (req: Request, res: Response) => {
