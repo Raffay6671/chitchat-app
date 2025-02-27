@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart'; // ✅ Add Provider package
-
+import 'package:provider/provider.dart';
 import 'src/screens/splash/splash_screen.dart';
 import 'src/screens/onboarding/onboarding_screen.dart';
 import 'src/screens/login/login_screen.dart';
 import 'src/screens/signup/signup_screen.dart';
-import 'src/screens/home/home_screen.dart'; // ✅ Import Home Screen
-import 'src/providers/user_provider.dart'; // ✅ Import UserProvider
+import 'src/screens/home/home_screen.dart';
+import 'src/screens/chatscreen/chat_screen.dart';
+import 'src/providers/user_provider.dart';
+import './services/socket_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
-  ]).then((fn) {
+  ]).then((_) {
     runApp(
       MultiProvider(
         providers: [
-          ChangeNotifierProvider(create: (_) => UserProvider()), // ✅ Initialize UserProvider
+          ChangeNotifierProvider(create: (_) => UserProvider()),
+          ChangeNotifierProvider(create: (_) => SocketService()),
         ],
         child: const ChitChatApp(),
       ),
@@ -36,7 +38,7 @@ class ChitChatApp extends StatelessWidget {
       title: 'Chitchat',
       theme: ThemeData(
         fontFamily: 'Acme',
-        primarySwatch: Colors.blue, // ✅ Add a primary theme color
+        primarySwatch: Colors.blue,
       ),
       initialRoute: '/',
       routes: {
@@ -44,7 +46,13 @@ class ChitChatApp extends StatelessWidget {
         '/onboarding': (context) => const OnboardingScreen(),
         '/signup': (context) => const SignUpScreen(),
         '/login': (context) => const LoginScreen(),
-        '/home': (context) => const HomeScreen(), // ✅ Protected Home Page Route
+        '/home': (context) => const HomeScreen(),
+        // If you need a default /chat route, note it uses dummy values here:
+        '/chat': (context) => ChatScreen(
+              receiverId: '',
+              receiverName: '',
+              receiverProfileImage: null,
+            ),
       },
     );
   }

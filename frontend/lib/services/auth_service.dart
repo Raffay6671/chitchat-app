@@ -5,10 +5,22 @@ import 'package:logging/logging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../src/providers/user_provider.dart'; // ✅ Import UserProvider for state management
+import 'package:flutter/foundation.dart';  // For checking if the app is running on physical device or emulator
 
 class AuthService {
   static final Logger _logger = Logger('AuthService');
-  static const String baseUrl = 'http://10.0.2.2:5000/api/auth';
+
+  // Dynamically set base URL based on whether the app is running on an emulator or physical device
+ static String get baseUrl {
+  if (kIsWeb) {
+    return 'http://localhost:5000/api/auth'; // For web
+  } else if (defaultTargetPlatform == TargetPlatform.android) {
+    return 'http://10.10.20.5:5000/api/auth'; // Your machine's IP address
+  } else {
+    return 'http://10.0.2.2:5000/api/auth'; // Emulator
+  }
+}
+
 
   // ✅ Registration API
   static Future<http.Response> registerUser({
@@ -55,14 +67,13 @@ class AuthService {
         _logger.info("✅ Tokens saved successfully");
 
         // ✅ Save all user data using Provider
-Provider.of<UserProvider>(context, listen: false).setUserData(
-  id: data['user']['id'],
-  username: data['user']['username'],
-  email: data['user']['email'],
-  displayName: data['user']['displayName'],
-  profilePicture: data['user']['profilePicture'],
-);
-
+        Provider.of<UserProvider>(context, listen: false).setUserData(
+          id: data['user']['id'],
+          username: data['user']['username'],
+          email: data['user']['email'],
+          displayName: data['user']['displayName'],
+          profilePicture: data['user']['profilePicture'],
+        );
       }
 
       return response;
@@ -157,73 +168,67 @@ Provider.of<UserProvider>(context, listen: false).setUserData(
     return false;
   }
 
-// ✅ Fetch User Data API
-static Future<void> fetchUserData(BuildContext context) async {
-  try {
-    final accessToken = await getAccessToken();
+  // ✅ Fetch User Data API
+  static Future<void> fetchUserData(BuildContext context) async {
+    try {
+      final accessToken = await getAccessToken();
 
-    final response = await http.get(
-      Uri.parse('$baseUrl/user'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $accessToken',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      Provider.of<UserProvider>(context, listen: false).setUserData(
-        id: data['user']['id'],
-        username: data['user']['username'],
-        email: data['user']['email'],
-        displayName: data['user']['displayName'],
-        profilePicture: data['user']['profilePicture'],
+      final response = await http.get(
+        Uri.parse('$baseUrl/user'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
       );
-    } else {
-      throw Exception('Failed to fetch user data');
-    }
-  } catch (e) {
-    _logger.severe("Fetch User Data Error: $e");
-  }
-}
 
-
-
-// ✅ Fetch All Users API
-static Future<List<Map<String, String>>> fetchAllUsers(BuildContext context) async {
-  try {
-    final accessToken = await getAccessToken();
-
-    final response = await http.get(
-      Uri.parse('$baseUrl/users'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $accessToken',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      List<Map<String, String>> users = [];
-      for (var user in data['users']) {
-        users.add({
-          "id": user['id'],
-          "username": user['username'],
-          "displayName": user['displayName'],
-          "profilePicture": user['profilePicture'],
-        });
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        Provider.of<UserProvider>(context, listen: false).setUserData(
+          id: data['user']['id'],
+          username: data['user']['username'],
+          email: data['user']['email'],
+          displayName: data['user']['displayName'],
+          profilePicture: data['user']['profilePicture'],
+        );
+      } else {
+        throw Exception('Failed to fetch user data');
       }
-      return users;
-    } else {
-      throw Exception('Failed to fetch users');
+    } catch (e) {
+      _logger.severe("Fetch User Data Error: $e");
     }
-  } catch (e) {
-    _logger.severe("Fetch All Users Error: $e");
-    return [];
+  }
+
+  // ✅ Fetch All Users API
+  static Future<List<Map<String, String>>> fetchAllUsers(BuildContext context) async {
+    try {
+      final accessToken = await getAccessToken();
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/users'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        List<Map<String, String>> users = [];
+        for (var user in data['users']) {
+          users.add({
+            "id": user['id'],
+            "username": user['username'],
+            "displayName": user['displayName'],
+            "profilePicture": user['profilePicture'],
+          });
+        }
+        return users;
+      } else {
+        throw Exception('Failed to fetch users');
+      }
+    } catch (e) {
+      _logger.severe("Fetch All Users Error: $e");
+      return [];
+    }
   }
 }
-
-}
-
-
-

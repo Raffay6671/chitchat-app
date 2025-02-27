@@ -60,7 +60,7 @@ class TopNavBar extends StatelessWidget {
             child: ClipOval(
               child: profilePicture != null
                   ? Image.network(
-                      'http://10.0.2.2:5000$profilePicture',
+                      'http://10.10.20.5:5000$profilePicture',
                       fit: BoxFit.cover,
                     )
                   : const Icon(

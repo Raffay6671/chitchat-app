@@ -18,8 +18,10 @@ dependencies:
   cupertino_icons: ^1.0.8    # iOS styled icons
   http: ^1.1.0               # HTTP requests for API communication
   provider: ^6.1.1           # State management
+  platform: ^3.0.0
   shared_preferences: ^2.2.1 # Local storage for persisting data like tokens
   logging: ^1.2.0            # For structured logging and better debug practices
+  socket_io_client: ^3.0.2
 
 # Development dependencies for testing and linting
 dev_dependencies:

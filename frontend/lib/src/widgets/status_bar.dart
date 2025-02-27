@@ -42,7 +42,7 @@ class StatusBar extends StatelessWidget {
                         radius: 30,
                         backgroundColor: Colors.grey[300],
                         backgroundImage: profilePicture != null
-                            ? NetworkImage('http://10.0.2.2:5000$profilePicture')
+                            ? NetworkImage('http://10.10.20.5:5000$profilePicture')
                             : null,
                         child: profilePicture == null
                             ? const Icon(Icons.person, size: 50, color: Colors.white)
@@ -95,7 +95,7 @@ class StatusBar extends StatelessWidget {
                               children: [
                                 CircleAvatar(
                                   radius: 30,
-                                  backgroundImage: NetworkImage('http://10.0.2.2:5000${user["profilePicture"]}'),
+                                  backgroundImage: NetworkImage('http://10.10.20.5:5000${user["profilePicture"]}'),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
