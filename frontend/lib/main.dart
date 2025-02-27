@@ -1,30 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+
+// Screens
 import 'src/screens/splash/splash_screen.dart';
 import 'src/screens/onboarding/onboarding_screen.dart';
 import 'src/screens/login/login_screen.dart';
 import 'src/screens/signup/signup_screen.dart';
 import 'src/screens/home/home_screen.dart';
 import 'src/screens/chatscreen/chat_screen.dart';
+
+// Providers
 import 'src/providers/user_provider.dart';
-import './services/socket_service.dart';
+import 'src/providers/message_provider.dart';
+import 'services/socket_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]).then((_) {
-    runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => UserProvider()),
-          ChangeNotifierProvider(create: (_) => SocketService()),
-        ],
-        child: const ChitChatApp(),
-      ),
-    );
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((_) {
+    runApp(const ChitChatApp());
   });
 }
 
@@ -33,27 +28,33 @@ class ChitChatApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Chitchat',
-      theme: ThemeData(
-        fontFamily: 'Acme',
-        primarySwatch: Colors.blue,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),  // ✅ Manages user authentication state
+        ChangeNotifierProvider(create: (_) => SocketService()), // ✅ Manages WebSocket connection
+        ChangeNotifierProvider(create: (_) => MessageProvider()), // ✅ Manages chat messages globally
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Chitchat',
+        theme: ThemeData(
+          fontFamily: 'Acme',
+          primarySwatch: Colors.blue,
+        ),
+        initialRoute: '/',
+        routes: {
+          '/': (context) => const SplashScreen(),
+          '/onboarding': (context) => const OnboardingScreen(),
+          '/signup': (context) => const SignUpScreen(),
+          '/login': (context) => const LoginScreen(),
+          '/home': (context) => const HomeScreen(),
+          '/chat': (context) => ChatScreen(
+                receiverId: '',
+                receiverName: '',
+                receiverProfileImage: null,
+              ),
+        },
       ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const SplashScreen(),
-        '/onboarding': (context) => const OnboardingScreen(),
-        '/signup': (context) => const SignUpScreen(),
-        '/login': (context) => const LoginScreen(),
-        '/home': (context) => const HomeScreen(),
-        // If you need a default /chat route, note it uses dummy values here:
-        '/chat': (context) => ChatScreen(
-              receiverId: '',
-              receiverName: '',
-              receiverProfileImage: null,
-            ),
-      },
     );
   }
 }

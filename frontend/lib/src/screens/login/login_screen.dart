@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../widgets/auth_heading.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/link_text.dart';
 import '../../../services/auth_service.dart';
+import '../../../services/socket_service.dart';
+import '../../providers/user_provider.dart';
+import '../../providers/message_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,50 +22,58 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
 
-  // Regex for email and password validation
-  final RegExp _emailRegExp = RegExp(r'^[^@]+@[^@]+\.[^@]+$'); // Basic email pattern
-  final RegExp _passwordRegExp = RegExp(
-      r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$'); // Minimum 8 characters, at least one letter and one number
+  // Regex for validation
+  final RegExp _emailRegExp = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+  final RegExp _passwordRegExp = RegExp(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$');
 
-  // Perform Login
-void _loginUser() async {
-  if (!_formKey.currentState!.validate()) return;
+  Future<void> _loginUser() async {
+    if (!_formKey.currentState!.validate()) return;
 
-  setState(() => _isLoading = true);
+    setState(() => _isLoading = true);
 
-  // ✅ Pass the context as a parameter
-  var response = await AuthService.loginUser(
-    email: _emailController.text.trim(),
-    password: _passwordController.text.trim(),
-    context: context, // ✅ Pass the context here
-  );
-
-  if (!mounted) return; // ✅ Check if the widget is still active
-
-  setState(() => _isLoading = false);
-
-  if (response.statusCode == 200) {
-    if (!mounted) return; // ✅ Check before using context again
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Login Successful!")),
+    final response = await AuthService.loginUser(
+      email: _emailController.text.trim(),
+      password: _passwordController.text.trim(),
+      context: context,
     );
 
-    // ✅ Redirect to the Home or Dashboard Page
-    Navigator.pushReplacementNamed(context, '/home');
-  } else {
-    if (!mounted) return; // ✅ Check before using context again
+    if (!mounted) return;
+    setState(() => _isLoading = false);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Login Failed: ${response.body}")),
-    );
+    if (response.statusCode == 200) {
+      if (!mounted) return;
+
+      // ✅ Socket + Listener Setup
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final socketService = Provider.of<SocketService>(context, listen: false);
+      final messageProvider = Provider.of<MessageProvider>(context, listen: false);
+
+      if (userProvider.id != null && userProvider.id!.isNotEmpty) {
+        socketService.connect(userProvider.id!);
+
+        // Attach our global message listener exactly ONCE
+        // Off any old listener (if any), then reattach
+        socketService.listenForMessages((data) {
+          // Deduplicate by `data['id']` if your server provides unique IDs
+          messageProvider.addMessage(data);
+        });
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Login Successful!")),
+      );
+      Navigator.pushReplacementNamed(context, '/home');
+    } else {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Login Failed: ${response.body}")),
+      );
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -70,14 +82,12 @@ void _loginUser() async {
               key: _formKey,
               child: Column(
                 children: [
-                  // Heading
-                  AuthHeading(
+                  const AuthHeading(
                     title: "Log in to Chatbox",
-                    subtitle:
-                        "Welcome back! Sign in using your social account or email to continue.",
+                    subtitle: "Welcome back! Sign in with your email to continue.",
                   ),
 
-                  // Email Input Field with Regex Validation
+                  // EMAIL
                   Padding(
                     padding: const EdgeInsets.only(top: 80),
                     child: CustomTextField(
@@ -90,12 +100,12 @@ void _loginUser() async {
                         if (!_emailRegExp.hasMatch(value)) {
                           return "Please enter a valid email address";
                         }
-                        return null; // Valid input
+                        return null;
                       },
                     ),
                   ),
 
-                  // Password Input Field with Regex Validation
+                  // PASSWORD
                   Padding(
                     padding: const EdgeInsets.only(top: 24),
                     child: CustomTextField(
@@ -107,20 +117,20 @@ void _loginUser() async {
                           return "Password cannot be empty";
                         }
                         if (!_passwordRegExp.hasMatch(value)) {
-                          return "Password must be at least 8 characters, include letters and numbers";
+                          return "Password must be at least 8 characters and contain letters+numbers";
                         }
-                        return null; // Valid input
+                        return null;
                       },
                     ),
                   ),
 
-                  // Login Button
+                  // LOGIN BUTTON
                   Padding(
                     padding: const EdgeInsets.only(top: 40, bottom: 20),
                     child: SizedBox(
                       width: 370,
                       child: _isLoading
-                          ? CircularProgressIndicator()
+                          ? const CircularProgressIndicator()
                           : CustomButton(
                               text: "Log in",
                               onPressed: _loginUser,
@@ -130,11 +140,11 @@ void _loginUser() async {
                     ),
                   ),
 
-                  // Forgot Password Link
+                  // FORGOT PASSWORD
                   LinkText(
                     text: "Forgot password?",
                     onTap: () {
-                      // Navigate to Forgot Password Page
+                      // ...
                     },
                   ),
                 ],
