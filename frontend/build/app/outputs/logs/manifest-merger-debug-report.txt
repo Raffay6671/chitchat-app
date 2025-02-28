@@ -23,13 +23,15 @@ MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/qlu/.
 manifest
 ADDED from /home/qlu/flutter_project/adv_basics/frontend/android/app/src/main/AndroidManifest.xml:1:1-45:12
 MERGED from /home/qlu/flutter_project/adv_basics/frontend/android/app/src/main/AndroidManifest.xml:1:1-45:12
-INJECTED from /home/qlu/flutter_project/adv_basics/frontend/android/app/src/debug/AndroidManifest.xml:1:1-7:12
-INJECTED from /home/qlu/flutter_project/adv_basics/frontend/android/app/src/debug/AndroidManifest.xml:1:1-7:12
-INJECTED from /home/qlu/flutter_project/adv_basics/frontend/android/app/src/debug/AndroidManifest.xml:1:1-7:12
+INJECTED from /home/qlu/flutter_project/adv_basics/frontend/android/app/src/debug/AndroidManifest.xml:1:1-9:12
+INJECTED from /home/qlu/flutter_project/adv_basics/frontend/android/app/src/debug/AndroidManifest.xml:1:1-9:12
+INJECTED from /home/qlu/flutter_project/adv_basics/frontend/android/app/src/debug/AndroidManifest.xml:1:1-9:12
 MERGED from [:shared_preferences_android] /home/qlu/flutter_project/adv_basics/frontend/build/shared_preferences_android/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.datastore:datastore-core-android:1.1.1] /home/qlu/.gradle/caches/8.10.2/transforms/f66b4ebeb8e04a26c0939bfc3a155c4b/transformed/jetified-datastore-core-release/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.datastore:datastore-preferences-android:1.1.1] /home/qlu/.gradle/caches/8.10.2/transforms/d0a351c7f5284a2196f3216de8771741/transformed/jetified-datastore-preferences-release/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.datastore:datastore-android:1.1.1] /home/qlu/.gradle/caches/8.10.2/transforms/f90f9a7324ae5a46421e1e6e4732c91a/transformed/jetified-datastore-release/AndroidManifest.xml:17:1-22:12
+MERGED from [:flutter_contacts] /home/qlu/flutter_project/adv_basics/frontend/build/flutter_contacts/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:2:1-7:12
+MERGED from [:permission_handler_android] /home/qlu/flutter_project/adv_basics/frontend/build/permission_handler_android/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.preference:preference:1.2.1] /home/qlu/.gradle/caches/8.10.2/transforms/0098a6e93522fecc805d8900172003dc/transformed/preference-1.2.1/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.appcompat:appcompat:1.1.0] /home/qlu/.gradle/caches/8.10.2/transforms/3a4dcd3e8c92efa77cfa193b658940d9/transformed/appcompat-1.1.0/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.fragment:fragment-ktx:1.7.1] /home/qlu/.gradle/caches/8.10.2/transforms/2e4c2e4e231b6a1dd462fb9cdc4ff977/transformed/jetified-fragment-ktx-1.7.1/AndroidManifest.xml:2:1-7:12
@@ -103,6 +105,10 @@ uses-permission#android.permission.INTERNET
 ADDED from /home/qlu/flutter_project/adv_basics/frontend/android/app/src/debug/AndroidManifest.xml:6:5-66
 	android:name
 		ADDED from /home/qlu/flutter_project/adv_basics/frontend/android/app/src/debug/AndroidManifest.xml:6:22-64
+uses-permission#android.permission.READ_CONTACTS
+ADDED from /home/qlu/flutter_project/adv_basics/frontend/android/app/src/debug/AndroidManifest.xml:7:5-71
+	android:name
+		ADDED from /home/qlu/flutter_project/adv_basics/frontend/android/app/src/debug/AndroidManifest.xml:7:22-69
 uses-sdk
 INJECTED from /home/qlu/flutter_project/adv_basics/frontend/android/app/src/debug/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /home/qlu/flutter_project/adv_basics/frontend/android/app/src/debug/AndroidManifest.xml
@@ -115,6 +121,10 @@ MERGED from [androidx.datastore:datastore-preferences-android:1.1.1] /home/qlu/.
 MERGED from [androidx.datastore:datastore-preferences-android:1.1.1] /home/qlu/.gradle/caches/8.10.2/transforms/d0a351c7f5284a2196f3216de8771741/transformed/jetified-datastore-preferences-release/AndroidManifest.xml:20:5-44
 MERGED from [androidx.datastore:datastore-android:1.1.1] /home/qlu/.gradle/caches/8.10.2/transforms/f90f9a7324ae5a46421e1e6e4732c91a/transformed/jetified-datastore-release/AndroidManifest.xml:20:5-44
 MERGED from [androidx.datastore:datastore-android:1.1.1] /home/qlu/.gradle/caches/8.10.2/transforms/f90f9a7324ae5a46421e1e6e4732c91a/transformed/jetified-datastore-release/AndroidManifest.xml:20:5-44
+MERGED from [:flutter_contacts] /home/qlu/flutter_project/adv_basics/frontend/build/flutter_contacts/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:5:5-44
+MERGED from [:flutter_contacts] /home/qlu/flutter_project/adv_basics/frontend/build/flutter_contacts/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:5:5-44
+MERGED from [:permission_handler_android] /home/qlu/flutter_project/adv_basics/frontend/build/permission_handler_android/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:5:5-44
+MERGED from [:permission_handler_android] /home/qlu/flutter_project/adv_basics/frontend/build/permission_handler_android/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:5:5-44
 MERGED from [androidx.preference:preference:1.2.1] /home/qlu/.gradle/caches/8.10.2/transforms/0098a6e93522fecc805d8900172003dc/transformed/preference-1.2.1/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.preference:preference:1.2.1] /home/qlu/.gradle/caches/8.10.2/transforms/0098a6e93522fecc805d8900172003dc/transformed/preference-1.2.1/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.appcompat:appcompat:1.1.0] /home/qlu/.gradle/caches/8.10.2/transforms/3a4dcd3e8c92efa77cfa193b658940d9/transformed/appcompat-1.1.0/AndroidManifest.xml:20:5-22:41

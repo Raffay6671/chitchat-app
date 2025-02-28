@@ -15,7 +15,18 @@ class BottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       currentIndex: currentIndex,
-      onTap: onTap,
+      onTap: (index) {
+        if (index == 3) {
+          // ✅ Navigate to Create Group Page without modifying index
+          Navigator.pushNamed(context, '/group');
+        } else if (index == 4) {
+          // ✅ Navigate to Settings Page without modifying index
+          Navigator.pushNamed(context, '/settings');
+        } else {
+          // ✅ Keep existing navigation behavior
+          onTap(index);
+        }
+      },
       backgroundColor: Colors.white,
       selectedItemColor: const Color(0xFF3D4A7A), // Active tab color
       unselectedItemColor: Colors.grey,
@@ -24,7 +35,8 @@ class BottomNavBar extends StatelessWidget {
         _buildNavItem("assets/icons/message.svg", "Messages", 0, currentIndex),
         _buildNavItem("assets/icons/calls.svg", "Calls", 1, currentIndex),
         _buildNavItem("assets/icons/contacts.svg", "Contacts", 2, currentIndex),
-        _buildNavItem("assets/icons/settings.svg", "Settings", 3, currentIndex),
+        _buildNavItem("assets/icons/group.svg", "Groups", 3, currentIndex), // ✅ Group Icon
+        _buildNavItem("assets/icons/settings.svg", "Settings", 4, currentIndex), // ✅ Settings Icon
       ],
     );
   }
@@ -37,7 +49,7 @@ class BottomNavBar extends StatelessWidget {
         height: 24,
         width: 24,
         colorFilter: ColorFilter.mode(
-          currentIndex == index ? const Color(0xFF3D4A7A) : const Color.fromARGB(255, 36, 31, 31),
+          currentIndex == index ? const Color(0xFF3D4A7A) : Colors.grey,
           BlendMode.srcIn,
         ),
       ),

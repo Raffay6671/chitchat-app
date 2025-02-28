@@ -22,6 +22,8 @@ dependencies:
   shared_preferences: ^2.2.1 # Local storage for persisting data like tokens
   logging: ^1.2.0            # For structured logging and better debug practices
   socket_io_client: ^3.0.2
+  flutter_contacts: ^1.1.6
+  permission_handler: ^11.0.1
 
 # Development dependencies for testing and linting
 dev_dependencies:
@@ -42,6 +44,9 @@ flutter:
     - assets/icons/calls.svg
     - assets/icons/contacts.svg
     - assets/icons/settings.svg
+    - assets/icons/group.svg
+    - assets/icons/addcall.svg
+    - assets/icons/Search.svg
 
   # Custom fonts configuration
   fonts:

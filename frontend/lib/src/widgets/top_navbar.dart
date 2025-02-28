@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart'; // ✅ Import UserProvider for fetching profile picture
+import '../screens/searchscreen/user_search_screen.dart';
 
 class TopNavBar extends StatelessWidget {
   const TopNavBar({super.key});
@@ -15,22 +17,8 @@ class TopNavBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // 🔍 Search Icon with Gray Circular Background
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: Colors.white.withAlpha(25), // Light gray background using alpha
-              shape: BoxShape.circle,
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.search,
-                color: Colors.white, // White search icon
-                size: 30, // Adjusted size for better alignment
-              ),
-            ),
-          ),
+          // 🔍 Left Circular Icon with Custom SVG
+          _buildCircularSvgIcon(context, "assets/icons/Search.svg"), // ✅ Left SVG
 
           // 🏠 Centered "Home" Text
           Container(
@@ -71,6 +59,35 @@ class TopNavBar extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// ✅ Reusable Circular Icon with Custom SVG
+  Widget _buildCircularSvgIcon(BuildContext context, String svgPath) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: Colors.white.withAlpha(25),
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: IconButton(
+          icon: SvgPicture.asset(
+            svgPath, // ✅ Dynamic SVG Path
+            width: 23,
+            height: 23,
+            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+          ),
+          onPressed: () {
+            // ✅ Navigate to the search screen
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const UserSearchScreen()),
+            );
+          },
+        ),
       ),
     );
   }

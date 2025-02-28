@@ -27,6 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final RegExp _passwordRegExp = RegExp(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$');
 
   Future<void> _loginUser() async {
+    
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);

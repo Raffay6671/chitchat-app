@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../constants/colors.dart';
 import '../../constants/text_styles.dart';
+import '../../../services/socket_service.dart';
 import '../../../services/auth_service.dart';
 import '../onboarding/onboarding_screen.dart';
+import 'package:provider/provider.dart';
 import '../home/home_screen.dart'; // Import HomeScreen for navigation
-
+import '../../providers/user_provider.dart';
+import '../../providers/message_provider.dart';
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -14,37 +17,49 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  @override
+ @override
   void initState() {
     super.initState();
     _checkAuthentication();
   }
 
-  // ✅ Check if the user is authenticated
   Future<void> _checkAuthentication() async {
-    await Future.delayed(const Duration(seconds: 3)); // Simulate splash screen duration
-      if (!mounted) return; // Check if the widget is still mounted
+    // Simulate some delay for splash
+    await Future.delayed(const Duration(seconds: 3));
+    if (!mounted) return;
 
+    // 1) Check if user is already authenticated
+    bool isAuth = await AuthService.isAuthenticated(context);
+    if (!mounted) return;
 
-    bool isAuthenticated = await AuthService.isAuthenticated(context);
+    if (isAuth) {
+      // 2) Fetch user data to set userProvider.id
+      await AuthService.fetchUserData(context);
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final socketService = Provider.of<SocketService>(context, listen: false);
+      final messageProvider = Provider.of<MessageProvider>(context, listen: false);
 
-    if (mounted) {
-      if (isAuthenticated) {
-        // Navigate to Home Screen
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
-      } else {
-        // Navigate to Onboarding Screen
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const OnboardingScreen()),
-        );
+      // 3) If ID is set, connect the socket & attach global listener
+      if (userProvider.id != null && userProvider.id!.isNotEmpty) {
+        socketService.connect(userProvider.id!);
+        socketService.listenForMessages((data) {
+          messageProvider.addMessage(data);
+        });
       }
+
+      // 4) Go to Home Screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    } else {
+      // Not authenticated => Onboarding
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+      );
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

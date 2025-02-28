@@ -9,6 +9,8 @@ import 'src/screens/login/login_screen.dart';
 import 'src/screens/signup/signup_screen.dart';
 import 'src/screens/home/home_screen.dart';
 import 'src/screens/chatscreen/chat_screen.dart';
+import 'src/screens/creategroup/create_group_screen.dart'; // ✅ Import Group Screen
+import 'src/screens/settings/settings_screen.dart';  // ✅ Import Settings Screen
 
 // Providers
 import 'src/providers/user_provider.dart';
@@ -53,6 +55,8 @@ class ChitChatApp extends StatelessWidget {
                 receiverName: '',
                 receiverProfileImage: null,
               ),
+          '/group': (context) => const CreateGroupScreen(), // ✅ Added Group Page
+          '/settings': (context) => const SettingsScreen(), // ✅ Added Settings Page
         },
       ),
     );

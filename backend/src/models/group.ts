@@ -1,5 +1,5 @@
-import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../config/database';
+import { DataTypes, Model, Optional } from "sequelize";
+import sequelize from "../config/database";
 
 interface GroupAttributes {
   id: string;
@@ -8,9 +8,12 @@ interface GroupAttributes {
   updatedAt?: Date;
 }
 
-interface GroupCreationAttributes extends Optional<GroupAttributes, 'id'> {}
+interface GroupCreationAttributes extends Optional<GroupAttributes, "id"> {}
 
-class Group extends Model<GroupAttributes, GroupCreationAttributes> implements GroupAttributes {
+class Group
+  extends Model<GroupAttributes, GroupCreationAttributes>
+  implements GroupAttributes
+{
   public id!: string;
   public name!: string;
   public createdAt?: Date;
@@ -31,7 +34,7 @@ Group.init(
   },
   {
     sequelize,
-    modelName: 'Group',
+    modelName: "Group",
     underscored: true,
     timestamps: true,
   }
