@@ -8,7 +8,7 @@ class ContactsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ✅ Background Color Matches Home Screen
+      // ✅ Background Color Matches Home Screens
       body: Stack(
         children: [
           // 🌈 Gradient Background (Same as Home Screen)
@@ -45,11 +45,14 @@ class ContactsScreen extends StatelessWidget {
           SafeArea(
             child: Column(
               children: [
-            CallNavBar(
-              title: "Contacts", 
-              rightIconPath: "assets/icons/addcall.svg", // ✅ Example of a different right icon
-            ),
-                const SizedBox(height: 20), // ✅ Space between navbar & container
+                CallNavBar(
+                  title: "Contacts",
+                  rightIconPath:
+                      "assets/icons/addcall.svg", // ✅ Example of a different right icon
+                ),
+                const SizedBox(
+                  height: 20,
+                ), // ✅ Space between navbar & container
                 const ContactUsersContainer(), // ✅ Contact List from Phone Book
               ],
             ),

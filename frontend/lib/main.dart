@@ -10,17 +10,20 @@ import 'src/screens/signup/signup_screen.dart';
 import 'src/screens/home/home_screen.dart';
 import 'src/screens/chatscreen/chat_screen.dart';
 import 'src/screens/creategroup/create_group_screen.dart'; // ✅ Import Group Screen
-import 'src/screens/settings/settings_screen.dart';  // ✅ Import Settings Screen
+import 'src/screens/settings/settings_screen.dart'; // ✅ Import Settings Screen
 
 // Providers
 import 'src/providers/user_provider.dart';
 import 'src/providers/message_provider.dart';
 import 'services/socket_service.dart';
+import 'src/providers/group_message_provider.dart'; // ✅ Import GroupMessageProvider
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((_) {
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((
+    _,
+  ) {
     runApp(const ChitChatApp());
   });
 }
@@ -32,17 +35,23 @@ class ChitChatApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => UserProvider()),  // ✅ Manages user authentication state
-        ChangeNotifierProvider(create: (_) => SocketService()), // ✅ Manages WebSocket connection
-        ChangeNotifierProvider(create: (_) => MessageProvider()), // ✅ Manages chat messages globally
+        ChangeNotifierProvider(
+          create: (_) => UserProvider(),
+        ), // Manages user authentication state
+        ChangeNotifierProvider(
+          create: (_) => SocketService(),
+        ), // Manages WebSocket connection
+        ChangeNotifierProvider(
+          create: (_) => MessageProvider(),
+        ), // Manages chat messages globally
+        ChangeNotifierProvider(
+          create: (_) => GroupMessageProvider(),
+        ), // ✅ Add it here
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Chitchat',
-        theme: ThemeData(
-          fontFamily: 'Acme',
-          primarySwatch: Colors.blue,
-        ),
+        theme: ThemeData(fontFamily: 'Acme', primarySwatch: Colors.blue),
         initialRoute: '/',
         routes: {
           '/': (context) => const SplashScreen(),
@@ -50,13 +59,16 @@ class ChitChatApp extends StatelessWidget {
           '/signup': (context) => const SignUpScreen(),
           '/login': (context) => const LoginScreen(),
           '/home': (context) => const HomeScreen(),
-          '/chat': (context) => ChatScreen(
+          '/chat':
+              (context) => ChatScreen(
                 receiverId: '',
                 receiverName: '',
                 receiverProfileImage: null,
               ),
-          '/group': (context) => const CreateGroupScreen(), // ✅ Added Group Page
-          '/settings': (context) => const SettingsScreen(), // ✅ Added Settings Page
+          '/group':
+              (context) => const CreateGroupScreen(), // ✅ Added Group Page
+          '/settings':
+              (context) => const SettingsScreen(), // ✅ Added Settings Page
         },
       ),
     );

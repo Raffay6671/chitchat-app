@@ -1,118 +1,177 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
-import '../screens/chatscreen/chat_screen.dart'; // Import Chat Screen
+import '../screens/chatscreen/chat_screen.dart';
+import '../screens/chatscreen/group_chat_screen.dart';
+import '../widgets/group_collage_avatar.dart';
+import '../../../services/group_service.dart';
 
-class UserContainer extends StatelessWidget {
-  final List<Map<String, String>> users; // List of users passed to this widget
+class UserContainer extends StatefulWidget {
+  final List<Map<String, String>> users;
 
   const UserContainer({super.key, required this.users});
 
   @override
+  _UserContainerState createState() => _UserContainerState();
+}
+
+class _UserContainerState extends State<UserContainer> {
+  late Future<List<Map<String, dynamic>>> _futureGroups;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshGroups(); // ✅ Initial Fetch
+  }
+
+  void _refreshGroups() {
+    setState(() {
+      _futureGroups = GroupService.fetchGroups();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
-    final userId = userProvider.id; // Get the logged-in user's ID
-
-    // 🔥 Filter out the logged-in user from the users list
-    final filteredUsers = users.where((user) => user["id"] != userId).toList();
+    final userId = userProvider.id;
 
     return Expanded(
       child: Container(
-        width: double.infinity, // Ensure it takes full width
-        padding: const EdgeInsets.all(16.0), // Inside padding for content
+        width: double.infinity,
+        padding: const EdgeInsets.all(16.0),
         decoration: const BoxDecoration(
-          color: Colors.white, // Background color of the container
+          color: Colors.white,
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30), // Rounded top-left corner
-            topRight: Radius.circular(30), // Rounded top-right corner
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
           ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start, // Align items at the top
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
-            // Vertical Scrollable List of Users
-            Expanded(
-              child: ListView.separated(
-                itemCount: filteredUsers.length, // Number of filtered users
-                separatorBuilder: (context, index) => const Divider(
-                  thickness: 0.3, // Subtle divider for better UI
-                  color: Colors.grey,
+        child: RefreshIndicator(
+          // ✅ Pull-down to refresh
+          onRefresh: () async {
+            _refreshGroups();
+          },
+          child: FutureBuilder<List<Map<String, dynamic>>>(
+            future: _futureGroups, // ✅ Fetch groups dynamically
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return Center(child: Text("Error loading groups"));
+              }
+              final groups = snapshot.data ?? [];
+
+              // ✅ Merge users and groups dynamically
+              final List<Map<String, dynamic>> combinedList = [
+                ...groups.map(
+                  (group) => {
+                    "type": "group",
+                    "id": group["id"],
+                    "name": group["name"],
+                    "members": group["groupUsers"],
+                  },
                 ),
+                ...widget.users
+                    .where(
+                      (user) => user["id"] != userId,
+                    ) // Exclude current user
+                    .map(
+                      (user) => {
+                        "type": "user",
+                        "id": user["id"],
+                        "name": user["username"],
+                        "profilePicture": user["profilePicture"],
+                      },
+                    ),
+              ];
+
+              return ListView.separated(
+                itemCount: combinedList.length,
+                separatorBuilder:
+                    (context, index) =>
+                        const Divider(thickness: 0.3, color: Colors.grey),
                 itemBuilder: (context, index) {
-                  final user = filteredUsers[index]; // Only show filtered users
-                  final fullName = user["username"]; // Full name of the user
-                  final profileImage = user["profilePicture"]; // Profile image of the user
-                  final receiverId = user["id"]; // ID of the selected user
+                  final item = combinedList[index];
 
                   return GestureDetector(
                     onTap: () {
-                      // ✅ Navigate to ChatScreen when user is tapped
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ChatScreen(
-                            receiverId: receiverId!,
-                            receiverName: fullName ?? "Unknown",
+                      if (item["type"] == "group") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => GroupChatScreen(
+                                  groupId: item["id"],
+                                  groupName: item["name"],
+                                ),
                           ),
-                        ),
-                      );
+                        ).then(
+                          (_) =>
+                              _refreshGroups(), // ✅ Refresh when returning from GroupChatScreen
+                        );
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => ChatScreen(
+                                  receiverId: item["id"],
+                                  receiverName: item["name"],
+                                ),
+                          ),
+                        );
+                      }
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Row(
                         children: [
-                          // Profile Picture
-                          CircleAvatar(
-                            radius: 30,
-                            backgroundColor: Colors.grey[300], // Placeholder background
-                            backgroundImage: (profileImage != null && profileImage.isNotEmpty)
-                                ? NetworkImage('http://10.10.20.5:5000$profileImage')
-                                : null,
-                            child: (profileImage == null || profileImage.isEmpty)
-                                ? const Icon(Icons.person, size: 30, color: Colors.white)
-                                : null,
-                          ),
+                          // ✅ Show group collage if it's a group, else show user profile picture
+                          item["type"] == "group"
+                              ? GroupCollageAvatar(members: item["members"])
+                              : CircleAvatar(
+                                radius: 30,
+                                backgroundColor: Colors.grey[300],
+                                backgroundImage:
+                                    item["profilePicture"] != null &&
+                                            item["profilePicture"].isNotEmpty
+                                        ? NetworkImage(
+                                          'http://10.10.20.5:5000${item["profilePicture"]}',
+                                        )
+                                        : null,
+                                child:
+                                    item["profilePicture"] == null ||
+                                            item["profilePicture"].isEmpty
+                                        ? const Icon(
+                                          Icons.person,
+                                          size: 30,
+                                          color: Colors.white,
+                                        )
+                                        : null,
+                              ),
                           const SizedBox(width: 15),
-                          // Full Name Text
+
+                          // ✅ Display name (group or user)
                           Expanded(
                             child: Text(
-                              fullName ?? "Full Name Not Available", // Display user full name
+                              item["name"] ?? "Unknown",
                               style: const TextStyle(
-                                color: Color(0xFF000E08), // Set color according to Figma
-                                fontFamily: 'Poppins', // Apply Poppins font
-                                fontWeight: FontWeight.w500, // Font weight 500
-                                fontSize: 20, // Font size 20px
-                                height: 1.0, // Line height
-                                letterSpacing: 0.0, // No letter spacing
+                                color: Color(0xFF000E08),
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 20,
                               ),
                             ),
-                          ),
-                          // Chat Icon Button
-                          IconButton(
-                            icon: const Icon(Icons.chat_bubble_outline, color: Colors.grey),
-                            onPressed: () {
-                              // ✅ Navigate to ChatScreen when chat icon is pressed
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ChatScreen(
-                                    receiverId: receiverId!,
-                                    receiverName: fullName ?? "Unknown",
-                                  ),
-                                ),
-                              );
-                            },
                           ),
                         ],
                       ),
                     ),
                   );
                 },
-              ),
-            ),
-          ],
+              );
+            },
+          ),
         ),
       ),
     );

@@ -13,9 +13,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0; // Track active tab
-
-  // List of screens for bottom navigation
+  int _selectedIndex = 0;
   final List<Widget> _screens = [
     const MessageScreen(),
     const CallsScreen(),
@@ -32,10 +30,22 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(child: _screens[_selectedIndex]),
+      body: SafeArea(
+        child: Navigator(
+          onGenerateRoute: (settings) {
+            return MaterialPageRoute(
+              builder: (context) => _screens[_selectedIndex],
+            );
+          },
+        ),
+      ),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _selectedIndex,
-        onTap: _onTabSelected,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
       ),
     );
   }

@@ -8,7 +8,7 @@ class MessageProvider with ChangeNotifier {
   // De-dup by ID so we never add the same message twice
   void addMessage(Map<String, dynamic> message) {
     if (message['id'] == null) {
-      // no unique ID - can't deduplicate
+      // no unique ID - can't deduplicatee
       _messages.add(message);
       notifyListeners();
       return;

@@ -24,6 +24,7 @@ dependencies:
   socket_io_client: ^3.0.2
   flutter_contacts: ^1.1.6
   permission_handler: ^11.0.1
+  intl: ^0.20.2
 
 # Development dependencies for testing and linting
 dev_dependencies:

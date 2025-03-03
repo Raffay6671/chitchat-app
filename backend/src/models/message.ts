@@ -1,6 +1,6 @@
-import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../config/database';
-import User from './user';
+import { DataTypes, Model, Optional } from "sequelize";
+import sequelize from "../config/database";
+import User from "./user";
 
 interface MessageAttributes {
   id: string;
@@ -12,9 +12,12 @@ interface MessageAttributes {
   updatedAt?: Date;
 }
 
-interface MessageCreationAttributes extends Optional<MessageAttributes, 'id'> {}
+interface MessageCreationAttributes extends Optional<MessageAttributes, "id"> {}
 
-class Message extends Model<MessageAttributes, MessageCreationAttributes> implements MessageAttributes {
+class Message
+  extends Model<MessageAttributes, MessageCreationAttributes>
+  implements MessageAttributes
+{
   public id!: string;
   public senderId!: string;
   public receiverId!: string;
@@ -34,12 +37,12 @@ Message.init(
     senderId: {
       type: DataTypes.UUID,
       allowNull: false,
-      references: { model: User, key: 'id' }
+      references: { model: User, key: "id" },
     },
     receiverId: {
       type: DataTypes.UUID,
       allowNull: false,
-      references: { model: User, key: 'id' }
+      references: { model: User, key: "id" },
     },
     messageType: {
       type: DataTypes.STRING,
@@ -48,12 +51,12 @@ Message.init(
     content: {
       type: DataTypes.TEXT,
       allowNull: false,
-    }
+    },
   },
   {
     sequelize,
-    modelName: 'Message',
-    tableName: 'messages',
+    modelName: "Message",
+    tableName: "messages",
     timestamps: true,
   }
 );

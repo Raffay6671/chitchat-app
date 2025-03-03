@@ -8,7 +8,7 @@ class CallsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ✅ Background Color Matches Home Screen
+      // ✅ Background Color Matches Home Screens
       body: Stack(
         children: [
           // 🌈 Gradient Background (Same as Home Screen)
@@ -45,10 +45,14 @@ class CallsScreen extends StatelessWidget {
           SafeArea(
             child: Column(
               children: [
-            CallNavBar(
-              title: "Calls", 
-              rightIconPath: "assets/icons/addcall.svg", // ✅ Example of a different right icon
-            ),                const SizedBox(height: 20), // ✅ Space between navbar & container
+                CallNavBar(
+                  title: "Calls",
+                  rightIconPath:
+                      "assets/icons/addcall.svg", // ✅ Example of a different right icon
+                ),
+                const SizedBox(
+                  height: 20,
+                ), // ✅ Space between navbar & container
                 const CallUserContainer(), // ✅ Contact List from Phone Book
               ],
             ),

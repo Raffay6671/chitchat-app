@@ -7,7 +7,7 @@ class UserProvider with ChangeNotifier {
   String? _displayName;
   String? _profilePicture;
 
-  // Getters for all user data
+  // Getters for all user datas
   String? get id => _id;
   String? get username => _username;
   String? get email => _email;

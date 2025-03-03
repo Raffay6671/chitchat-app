@@ -1,6 +1,6 @@
 // src/models/user.ts
-import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../config/database';
+import { DataTypes, Model, Optional } from "sequelize";
+import sequelize from "../config/database";
 
 // Define the attributes of the User model
 interface UserAttributes {
@@ -10,20 +10,20 @@ interface UserAttributes {
   password: string;
   displayName?: string;
   profilePicture?: string;
-
 }
 
-interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
+interface UserCreationAttributes extends Optional<UserAttributes, "id"> {}
 
-class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
+class User
+  extends Model<UserAttributes, UserCreationAttributes>
+  implements UserAttributes
+{
   public id!: string;
   public username!: string;
   public email!: string;
   public password!: string;
   public displayName?: string;
   public profilePicture?: string;
-  
-
 }
 
 User.init(
@@ -54,11 +54,10 @@ User.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
-   
   },
   {
-    sequelize, 
-    modelName: 'users', 
+    sequelize,
+    modelName: "users",
   }
 );
 

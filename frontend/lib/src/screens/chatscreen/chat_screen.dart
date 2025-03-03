@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import '../../../services/socket_service.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/message_provider.dart';
+import '../../widgets/message_input.dart'; // ✅ Added Import
 
 class ChatScreen extends StatefulWidget {
   final String receiverId;
@@ -35,9 +36,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _fetchHistory() async {
     setState(() => _isLoadingHistory = true);
-
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final messageProvider = Provider.of<MessageProvider>(context, listen: false);
+    final messageProvider = Provider.of<MessageProvider>(
+      context,
+      listen: false,
+    );
+
     if (userProvider.id == null || widget.receiverId.isEmpty) {
       setState(() => _isLoadingHistory = false);
       return;
@@ -47,22 +51,29 @@ class _ChatScreenState extends State<ChatScreen> {
     final theirId = widget.receiverId;
 
     try {
-      final url = Uri.parse('http://10.10.20.5:5000/api/messages/$myId/$theirId');
+      final url = Uri.parse(
+        'http://10.10.20.5:5000/api/messages/$myId/$theirId',
+      );
       final res = await http.get(url);
 
       if (res.statusCode == 200) {
         final data = json.decode(res.body) as Map<String, dynamic>;
         final List messagesList = data['messages'];
 
-        final history = messagesList.map<Map<String, dynamic>>((msg) => {
-          'id': msg['id'],
-          'senderId': msg['senderId'],
-          'receiverId': msg['receiverId'],
-          'message': msg['content'],
-          'createdAt': msg['createdAt'],
-        }).toList();
+        final history =
+            messagesList.map<Map<String, dynamic>>((msg) {
+              return {
+                'id': msg['id'],
+                'senderId': msg['senderId'],
+                'receiverId': msg['receiverId'],
+                'message': msg['content'],
+                'createdAt': msg['createdAt'],
+              };
+            }).toList();
 
         messageProvider.setMessages(history);
+      } else {
+        debugPrint('❌ Error fetching messages: ${res.body}');
       }
     } catch (e) {
       debugPrint('❌ Error fetching chat history: $e');
@@ -75,10 +86,15 @@ class _ChatScreenState extends State<ChatScreen> {
     if (_messageController.text.isEmpty) return;
 
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final messageProvider = Provider.of<MessageProvider>(context, listen: false);
+    final messageProvider = Provider.of<MessageProvider>(
+      context,
+      listen: false,
+    );
 
     final messageMap = {
-      'id': DateTime.now().millisecondsSinceEpoch.toString(), // generate unique ID
+      'id':
+          DateTime.now().millisecondsSinceEpoch
+              .toString(), // generates unique ID
       'senderId': userProvider.id,
       'receiverId': widget.receiverId,
       'message': _messageController.text,
@@ -93,6 +109,18 @@ class _ChatScreenState extends State<ChatScreen> {
     socketService.sendMessage(messageMap);
 
     _messageController.clear();
+  }
+
+  void _attachFile() {
+    print("Attach file");
+  }
+
+  void _openCamera() {
+    print("Open Camera");
+  }
+
+  void _recordAudio() {
+    print("Record Audio");
   }
 
   @override
@@ -136,7 +164,16 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
           ),
-          _buildMessageInput(),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: MessageInput(
+              controller: _messageController,
+              onSend: _sendMessage,
+              onAttach: _attachFile,
+              onCamera: _openCamera,
+              onMic: _recordAudio,
+            ),
+          ),
         ],
       ),
     );
@@ -156,7 +193,10 @@ class _ChatScreenState extends State<ChatScreen> {
           crossAxisAlignment:
               isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            Text(text, style: TextStyle(color: isMe ? Colors.white : Colors.black)),
+            Text(
+              text,
+              style: TextStyle(color: isMe ? Colors.white : Colors.black),
+            ),
             const SizedBox(height: 5),
             Text(
               time,
@@ -164,31 +204,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 color: isMe ? Colors.white70 : Colors.black54,
                 fontSize: 10,
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMessageInput() {
-    return Container(
-      color: Colors.grey[200],
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: SafeArea(
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _messageController,
-                decoration: const InputDecoration.collapsed(
-                  hintText: 'Type a message...',
-                ),
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.send),
-              onPressed: _sendMessage,
             ),
           ],
         ),

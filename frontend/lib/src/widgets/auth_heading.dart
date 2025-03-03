@@ -35,7 +35,9 @@ class AuthHeading extends StatelessWidget {
 
         // Subheading
         Padding(
-          padding: const EdgeInsets.only(top: 35), // Spacing between heading and subheading
+          padding: const EdgeInsets.only(
+            top: 35,
+          ), // Spacing between heading and subheading
           child: Center(
             child: SizedBox(
               width: 293,

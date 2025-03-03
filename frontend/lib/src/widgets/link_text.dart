@@ -5,11 +5,7 @@ class LinkText extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
 
-  const LinkText({
-    super.key,
-    required this.text,
-    required this.onTap,
-  });
+  const LinkText({super.key, required this.text, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +13,7 @@ class LinkText extends StatelessWidget {
       onTap: onTap,
       child: Text(
         text,
-        style: AppTextStyles.linkText, // Apply centralized link text style
+        style: AppTextStyles.linkText, // Apply centralized link text styles
       ),
     );
   }

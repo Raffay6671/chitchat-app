@@ -4,8 +4,7 @@ import '../../constants/text_styles.dart';
 import 'package:flutter/gestures.dart';
 import '../../widgets/custom_button.dart'; // Import the custom button
 import '../../screens/login/login_screen.dart'; // Import the login screen
-import '../../screens/signup/signup_screen.dart'; // Import SignUpScreen
-
+import '../../screens/signup/signup_screen.dart'; // Import SignUpScreens
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
@@ -63,65 +62,64 @@ class OnboardingScreen extends StatelessWidget {
 
             // Reusable Sign-Up Button (Horizontally Centered)
             // Reusable Sign-Up Button (Horizontally Centered)
-          Positioned(
-            top: 670,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: CustomButton(
-  text: "Sign up with email",
-  backgroundColor: AppColors.semiTransparentWhite,
-  onPressed: () {
-    // Navigate to Sign Up Page
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const SignUpScreen(),
-      ),
-    );
-  },
-  borderRadius: 24,
-),
-
+            Positioned(
+              top: 670,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: CustomButton(
+                  text: "Sign up with email",
+                  backgroundColor: AppColors.semiTransparentWhite,
+                  onPressed: () {
+                    // Navigate to Sign Up Page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SignUpScreen(),
+                      ),
+                    );
+                  },
+                  borderRadius: 24,
+                ),
+              ),
             ),
-          ),
-
 
             // Existing Account Text with "Log in" Link
             Positioned(
-  top: 790,
-  left: 0,
-  right: 0,
-  child: Center(
-    child: SizedBox(
-      width: 200,
-      height: 20,
-      child: RichText(
-        text: TextSpan(
-          style: AppTextStyles.existingAccountText, // Main text style
-          children: [
-            const TextSpan(text: "Existing account? "),
-            TextSpan(
-              text: "Log in",
-              style: AppTextStyles.loginLinkText, // Link style
-              recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  // Navigate to the Login Page
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LoginScreen(),
+              top: 790,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: SizedBox(
+                  width: 200,
+                  height: 20,
+                  child: RichText(
+                    text: TextSpan(
+                      style:
+                          AppTextStyles.existingAccountText, // Main text style
+                      children: [
+                        const TextSpan(text: "Existing account? "),
+                        TextSpan(
+                          text: "Log in",
+                          style: AppTextStyles.loginLinkText, // Link style
+                          recognizer:
+                              TapGestureRecognizer()
+                                ..onTap = () {
+                                  // Navigate to the Login Page
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const LoginScreen(),
+                                    ),
+                                  );
+                                },
+                        ),
+                      ],
                     ),
-                  );
-                },
+                  ),
+                ),
+              ),
             ),
-          ],
-        ),
-      ),
-    ),
-  ),
-),
-
           ],
         ),
       ),

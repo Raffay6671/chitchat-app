@@ -12,8 +12,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   int _currentIndex = 4; // ✅ Set index to 4 for Settings
 
   void _onTabTapped(int index) {
-    if (index != 4) { // ✅ Prevent redundant navigation on settings
-      Navigator.pop(context); // ✅ Return to the main screen
+    if (index != 4) {
+      // ✅ Prevent redundant navigation on settings
+      Navigator.pop(context); // ✅ Return to the main screens
     }
   }
 

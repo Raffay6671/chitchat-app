@@ -9,49 +9,58 @@ class CallNavBar extends StatelessWidget {
   const CallNavBar({
     super.key,
     required this.title,
-    required this.rightIconPath, // ✅ Required right icon parameter
+    required this.rightIconPath,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // 🔍 Left Circular Icon with Custom SVG
-          _buildCircularIcon(context, "assets/icons/Search.svg"), // ✅ Left SVG (Search)
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double screenWidth = constraints.maxWidth;
+        double iconSize = screenWidth * 0.12; // Scale icons dynamically
+        double textSize = screenWidth * 0.06; // Scale text size
+        double paddingSize = screenWidth * 0.04; // Dynamic padding
 
-          // 📞 Centered Title Text (Now Passed Dynamically)
-          Container(
-            width: 110,
-            height: 20,
-            alignment: Alignment.center,
-            child: Text(
-              title, // ✅ Now uses the passed title dynamically
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w700, // ✅ Bold (700)
-                fontSize: 23, // ✅ Font Size
-                height: 1.0, // ✅ Proper line height
-                letterSpacing: 0,
-                color: Colors.white, // ✅ Text color
-              ),
-            ),
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: paddingSize, // Responsive horizontal padding
+            vertical: paddingSize * 0.4, // Responsive vertical padding
           ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // 🔍 Left Circular Icon with Custom SVG
+              _buildCircularIcon(context, "assets/icons/Search.svg", iconSize),
 
-          // 🔍 Right Circular Icon (Now Passed Dynamically)
-          _buildCircularIcon(context, rightIconPath), // ✅ Right Icon (Dynamic)
-        ],
-      ),
+              // 📞 Centered Title Text (Now Passed Dynamically)
+              Text(
+                title,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w700, // ✅ Bold (700)
+                  fontSize: textSize, // ✅ Responsive Font Size
+                  color: Colors.white, // ✅ Text color
+                ),
+              ),
+
+              // 🔍 Right Circular Icon (Now Passed Dynamically)
+              _buildCircularIcon(context, rightIconPath, iconSize),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  /// ✅ Reusable Circular Icon with Custom SVG
-  Widget _buildCircularIcon(BuildContext context, String svgPath) {
+  /// ✅ Reusable Circular Icon with Custom SVG (Now Responsive)
+  Widget _buildCircularIcon(
+    BuildContext context,
+    String svgPath,
+    double iconSize,
+  ) {
     return Container(
-      width: 50,
-      height: 50,
+      width: iconSize,
+      height: iconSize,
       decoration: BoxDecoration(
         color: Colors.white.withAlpha(25),
         shape: BoxShape.circle,
@@ -60,12 +69,11 @@ class CallNavBar extends StatelessWidget {
         child: IconButton(
           icon: SvgPicture.asset(
             svgPath,
-            width: 28,
-            height: 23,
+            width: iconSize * 0.6, // Scale SVG size
+            height: iconSize * 0.6,
             colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
           ),
           onPressed: () {
-            // ✅ Navigate to Search Screen (You can modify this action based on which icon is clicked)
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const UserSearchScreen()),

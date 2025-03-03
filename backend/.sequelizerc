@@ -1,0 +1,21 @@
+// const path = require("path");
+
+// module.exports = {
+//   config: path.resolve("src/config/database.ts"), // ✅ Use TypeScript config
+//   "models-path": path.resolve("src/models"),
+//   "migrations-path": path.resolve("migrations")
+// };
+
+
+
+
+// .sequelizerc
+const path = require('path');
+
+module.exports = {
+  'config': path.resolve('./sequelize-cli-config.js'), // Points to a JS config file
+  'models-path': path.resolve('./src/models'),
+  'migrations-path': path.resolve('./migrations'),
+  // If using seeders:
+  // 'seeders-path': path.resolve('./seeders')
+};

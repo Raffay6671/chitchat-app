@@ -13,13 +13,19 @@ class AppColors {
   static const Color grey = Colors.grey;
 
   // 🔹 Button Background Color
-  static const Color buttonColor = Color(0xFF3D4A7A); // ✅ Matches the Figma Button (#3D4A7A)
+  static const Color buttonColor = Color(
+    0xFF3D4A7A,
+  ); // ✅ Matches the Figma Button (#3D4A7A)
 
   // 🔹 Semi-Transparent Colors (For overlays, inputs, etc.)
-  static const Color semiTransparentWhite = Color(0x5EFFFFFF); // White with opacity (#FFFFFF5E)
+  static const Color semiTransparentWhite = Color(
+    0x5EFFFFFF,
+  ); // White with opacity (#FFFFFF5E)
 
   // 🔹 Input Field Background Color
-  static const Color inputFieldBackground = Color(0xFFF3F6F6); // Input field background from Figma
+  static const Color inputFieldBackground = Color(
+    0xFFF3F6F6,
+  ); // Input field background from Figma
 
   // 🔹 Avatar Background Colors (Used in CallUserContainer)
   static const List<Color> avatarColors = [
@@ -34,14 +40,17 @@ class AppColors {
   ];
 
   // 🔹 Newly Added Background Color (As per request)
-  static const Color lightPurpleBackground = Color(0x143D4A7A); // ✅ #3D4A7A14 (RGBA)
+  static const Color lightPurpleBackground = Color(
+    0x143D4A7A,
+  ); // ✅ #3D4A7A14 (RGBA)
 
+  //For the text color in the group creation screen
+  static const Color darkGreyBackground = Color(
+    0xFF272727,
+  ); // ✅ Matches Figma Background (#272727)
 
-//For the text color in the group creation screen
-    static const Color darkGreyBackground = Color(0xFF272727); // ✅ Matches Figma Background (#272727)
-
-
-// 🔹 Newly Added Text Color for Group Creation Screen
-static const Color mutedGreyText = Color(0x80797C7B); // ✅ Matches Figma (#797C7B80)
-
+  // 🔹 Newly Added Text Color for Group Creation Screen
+  static const Color mutedGreyText = Color(
+    0x80797C7B,
+  ); // ✅ Matches Figma (#797C7B80)
 }

@@ -1,5 +1,3 @@
-
-
 // File: lib/widgets/status_bar.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -20,61 +18,73 @@ class StatusBar extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          
           const SizedBox(height: 25),
 
           // Horizontal ListView for My Status and Other Users
           SizedBox(
-            height: 100,  // Adjust height as needed
+            height: 100, // Adjust height as needed
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [
                 // Display logged-in user's status with "+" icon
-            Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: Column(
-                children: [
-                  Stack(
-                    clipBehavior: Clip.none, // Allow overflow for the "+" icon
+                Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: Column(
                     children: [
-                      // Profile picture
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundColor: Colors.grey[300],
-                        backgroundImage: profilePicture != null
-                            ? NetworkImage('http://10.10.20.5:5000$profilePicture')
-                            : null,
-                        child: profilePicture == null
-                            ? const Icon(Icons.person, size: 50, color: Colors.white)
-                            : null,
-                      ),
-
-                      // Positioned "+" icon at the bottom right
-                      Positioned(
-                        bottom: -5, // Adjust the icon to be outside the profile picture
-                        right: -5,  // Adjust the icon to be at the bottom-right
-                        child: CircleAvatar(
-                          radius: 12,
-                          backgroundColor: Colors.white,
-                          child: const Icon(
-                            Icons.add,
-                            size: 16,
-                            color: Colors.black,
+                      Stack(
+                        clipBehavior:
+                            Clip.none, // Allow overflow for the "+" icon
+                        children: [
+                          // Profile picture
+                          CircleAvatar(
+                            radius: 30,
+                            backgroundColor: Colors.grey[300],
+                            backgroundImage:
+                                profilePicture != null
+                                    ? NetworkImage(
+                                      'http://10.10.20.5:5000$profilePicture',
+                                    )
+                                    : null,
+                            child:
+                                profilePicture == null
+                                    ? const Icon(
+                                      Icons.person,
+                                      size: 50,
+                                      color: Colors.white,
+                                    )
+                                    : null,
                           ),
+
+                          // Positioned "+" icon at the bottom right
+                          Positioned(
+                            bottom:
+                                -5, // Adjust the icon to be outside the profile picture
+                            right:
+                                -5, // Adjust the icon to be at the bottom-right
+                            child: CircleAvatar(
+                              radius: 12,
+                              backgroundColor: Colors.white,
+                              child: const Icon(
+                                Icons.add,
+                                size: 16,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        "My Status",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    "My Status",
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-                  ),
-                ],
-              ),
-            ),
+                ),
 
-              
                 // Display other users' status (display name and profile picture)
                 FutureBuilder(
                   future: AuthService.fetchAllUsers(context),
@@ -86,26 +96,34 @@ class StatusBar extends StatelessWidget {
                     if (snapshot.hasData) {
                       final users = snapshot.data as List<Map<String, String>>;
                       return Row(
-                        children: users
-                            .where((user) => user["id"] != userId) // Exclude logged-in user
-                            .map((user) {
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 16.0),
-                            child: Column(
-                              children: [
-                                CircleAvatar(
-                                  radius: 30,
-                                  backgroundImage: NetworkImage('http://10.10.20.5:5000${user["profilePicture"]}'),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  user["displayName"]!,  // Display Name should be used here
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              ],
-                            ),
-                          );
-                        }).toList(),
+                        children:
+                            users
+                                .where(
+                                  (user) => user["id"] != userId,
+                                ) // Exclude logged-in user
+                                .map((user) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 16.0),
+                                    child: Column(
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 30,
+                                          backgroundImage: NetworkImage(
+                                            'http://10.10.20.5:5000${user["profilePicture"]}',
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          user["displayName"]!, // Display Name should be used here
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                })
+                                .toList(),
                       );
                     }
                     return const Text("No Users Available");

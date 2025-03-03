@@ -5,22 +5,21 @@ import 'package:logging/logging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../src/providers/user_provider.dart'; // ✅ Import UserProvider for state management
-import 'package:flutter/foundation.dart';  // For checking if the app is running on physical device or emulator
+import 'package:flutter/foundation.dart'; // For checking if the app is running on physical device or emulator
 
 class AuthService {
   static final Logger _logger = Logger('AuthService');
 
   // Dynamically set base URL based on whether the app is running on an emulator or physical device
- static String get baseUrl {
-  if (kIsWeb) {
-    return 'http://localhost:5000/api/auth'; // For web
-  } else if (defaultTargetPlatform == TargetPlatform.android) {
-    return 'http://10.10.20.5:5000/api/auth'; // Your machine's IP address
-  } else {
-    return 'http://10.0.2.2:5000/api/auth'; // Emulator
+  static String get baseUrl {
+    if (kIsWeb) {
+      return 'http://localhost:5000/api/auth'; // For web
+    } else if (defaultTargetPlatform == TargetPlatform.android) {
+      return 'http://10.10.20.5:5000/api/auth'; // Your machine's IP address
+    } else {
+      return 'http://10.10.20.5:5000/api/auth'; // Emulator
+    }
   }
-}
-
 
   // ✅ Registration API
   static Future<http.Response> registerUser({
@@ -55,10 +54,7 @@ class AuthService {
       final response = await http.post(
         Uri.parse('$baseUrl/login'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': email,
-          'password': password,
-        }),
+        body: jsonEncode({'email': email, 'password': password}),
       );
 
       if (response.statusCode == 200) {
@@ -84,10 +80,14 @@ class AuthService {
   }
 
   // ✅ Save Tokens
-  static Future<void> saveTokens(String accessToken, String refreshToken) async {
+  static Future<void> saveTokens(
+    String accessToken,
+    String refreshToken,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('accessToken', accessToken);
     await prefs.setString('refreshToken', refreshToken);
+    debugPrint("✅ Access Token Saved: $accessToken");
   }
 
   // ✅ Retrieve Access Token
@@ -199,7 +199,9 @@ class AuthService {
   }
 
   // ✅ Fetch All Users API
-  static Future<List<Map<String, String>>> fetchAllUsers(BuildContext context) async {
+  static Future<List<Map<String, String>>> fetchAllUsers(
+    BuildContext context,
+  ) async {
     try {
       final accessToken = await getAccessToken();
 

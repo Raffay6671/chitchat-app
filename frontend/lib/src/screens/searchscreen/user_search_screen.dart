@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../services/auth_service.dart';
+import '../../../services/group_service.dart'; // ✅ Import group service
 import '../../providers/user_provider.dart';
 import '../chatscreen/chat_screen.dart';
+import '../chatscreen/group_chat_screen.dart'; // ✅ Import group chat screen
+import '../../widgets/group_collage_avatar.dart'; // ✅ Group avatar for displaying group users
 
 class UserSearchScreen extends StatefulWidget {
   const UserSearchScreen({super.key});
@@ -13,14 +16,14 @@ class UserSearchScreen extends StatefulWidget {
 
 class _UserSearchScreenState extends State<UserSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
-  List<Map<String, String>> _allUsers = [];
-  List<Map<String, String>> _filteredUsers = [];
+  List<Map<String, dynamic>> _allItems = []; // ✅ Holds users + groups
+  List<Map<String, dynamic>> _filteredItems = [];
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _fetchAllUsers();
+    _fetchAllUsersAndGroups();
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -31,34 +34,60 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
     super.dispose();
   }
 
-  Future<void> _fetchAllUsers() async {
+  Future<void> _fetchAllUsersAndGroups() async {
     setState(() => _isLoading = true);
-    final users = await AuthService.fetchAllUsers(context);
-    setState(() {
-      _allUsers = users;
-      _filteredUsers = users;
-      _isLoading = false;
-    });
+
+    try {
+      final users = await AuthService.fetchAllUsers(context);
+      final groups = await GroupService.fetchGroups();
+
+      // ✅ Merge users & groups into a single list
+      final combinedList = [
+        ...groups.map(
+          (group) => {
+            "type": "group",
+            "id": group["id"],
+            "name": group["name"],
+            "members": group["groupUsers"], // Group members list
+          },
+        ),
+        ...users.map(
+          (user) => {
+            "type": "user",
+            "id": user["id"],
+            "name": user["username"],
+            "profilePicture": user["profilePicture"],
+          },
+        ),
+      ];
+
+      setState(() {
+        _allItems = combinedList;
+        _filteredItems = combinedList;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print("❌ Error fetching users & groups: $e");
+      setState(() => _isLoading = false);
+    }
   }
 
   void _onSearchChanged() {
     final query = _searchController.text.trim().toLowerCase();
     setState(() {
-      _filteredUsers = query.isEmpty
-          ? _allUsers
-          : _allUsers
-              .where((user) => (user["username"]?.toLowerCase() ?? "").contains(query))
-              .toList();
+      _filteredItems =
+          query.isEmpty
+              ? _allItems
+              : _allItems.where((item) {
+                final name = item["name"]?.toLowerCase() ?? "";
+                return name.contains(query);
+              }).toList();
     });
   }
 
-  Widget _buildUserTile(Map<String, String> user) {
+  Widget _buildItemTile(Map<String, dynamic> item) {
     final userId = Provider.of<UserProvider>(context, listen: false).id;
-    final receiverId = user["id"] ?? "";
-    if (receiverId == userId) return const SizedBox.shrink();
-
-    final username = user["username"] ?? "Unknown User";
-    final profilePicture = user["profilePicture"];
+    final isGroup = item["type"] == "group";
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -74,26 +103,56 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
         ],
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        leading: CircleAvatar(
-          radius: 30,
-          backgroundColor: Colors.grey[300],
-          backgroundImage: (profilePicture != null && profilePicture.isNotEmpty)
-              ? NetworkImage('http://10.10.20.5:5000$profilePicture')
-              : null,
-          child: (profilePicture == null || profilePicture.isEmpty)
-              ? const Icon(Icons.person, color: Colors.white, size: 30)
-              : null,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 10,
         ),
+        leading:
+            isGroup
+                ? GroupCollageAvatar(
+                  members: item["members"],
+                ) // ✅ Show group collage avatar
+                : CircleAvatar(
+                  radius: 30,
+                  backgroundColor: Colors.grey[300],
+                  backgroundImage:
+                      item["profilePicture"] != null &&
+                              item["profilePicture"].isNotEmpty
+                          ? NetworkImage(
+                            'http://10.10.20.5:5000${item["profilePicture"]}',
+                          )
+                          : null,
+                  child:
+                      item["profilePicture"] == null ||
+                              item["profilePicture"].isEmpty
+                          ? const Icon(
+                            Icons.person,
+                            color: Colors.white,
+                            size: 30,
+                          )
+                          : null,
+                ),
         title: Text(
-          username,
+          item["name"] ?? "Unknown",
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
         ),
-        onTap: () => _navigateToChat(receiverId, username),
+        onTap: () {
+          if (isGroup) {
+            _navigateToGroupChat(item["id"], item["name"]);
+          } else {
+            _navigateToChat(item["id"], item["name"]);
+          }
+        },
         trailing: IconButton(
-          icon: const Icon(Icons.chat_bubble_outline),
+          icon: Icon(isGroup ? Icons.group : Icons.chat_bubble_outline),
           color: Colors.blueAccent,
-          onPressed: () => _navigateToChat(receiverId, username),
+          onPressed: () {
+            if (isGroup) {
+              _navigateToGroupChat(item["id"], item["name"]);
+            } else {
+              _navigateToChat(item["id"], item["name"]);
+            }
+          },
         ),
       ),
     );
@@ -103,17 +162,25 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ChatScreen(
-          receiverId: receiverId,
-          receiverName: receiverName,
-        ),
+        builder:
+            (_) =>
+                ChatScreen(receiverId: receiverId, receiverName: receiverName),
+      ),
+    );
+  }
+
+  void _navigateToGroupChat(String groupId, String groupName) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => GroupChatScreen(groupId: groupId, groupName: groupName),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final userCount = _filteredUsers.length;
+    final itemCount = _filteredItems.length;
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -140,7 +207,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
             controller: _searchController,
             style: const TextStyle(color: Colors.black87),
             decoration: const InputDecoration(
-              hintText: "Search People...",
+              hintText: "Search People & Groups...",
               hintStyle: TextStyle(color: Colors.black45),
               border: InputBorder.none,
               prefixIcon: Icon(Icons.search, color: Colors.black54),
@@ -148,38 +215,45 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
           ),
         ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(20, 20, 0, 10),
-                  child: Text(
-                    "People",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(20, 20, 0, 10),
+                    child: Text(
+                      "People & Groups",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: userCount == 0
-                      ? const Center(
-                          child: Text(
-                            "No users found",
-                            style: TextStyle(fontSize: 16, color: Colors.black54),
-                          ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.only(bottom: 20),
-                          itemCount: userCount,
-                          itemBuilder: (_, index) => _buildUserTile(_filteredUsers[index]),
-                        ),
-                ),
-              ],
-            ),
+                  Expanded(
+                    child:
+                        itemCount == 0
+                            ? const Center(
+                              child: Text(
+                                "No users or groups found",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            )
+                            : ListView.builder(
+                              padding: const EdgeInsets.only(bottom: 20),
+                              itemCount: itemCount,
+                              itemBuilder:
+                                  (_, index) =>
+                                      _buildItemTile(_filteredItems[index]),
+                            ),
+                  ),
+                ],
+              ),
     );
   }
 }

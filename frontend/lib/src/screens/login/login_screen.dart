@@ -6,6 +6,7 @@ import '../../widgets/custom_button.dart';
 import '../../widgets/link_text.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/socket_service.dart';
+import '../../../services/group_service.dart'; // ✅ Import GroupService
 import '../../providers/user_provider.dart';
 import '../../providers/message_provider.dart';
 
@@ -24,12 +25,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // Regex for validation
   final RegExp _emailRegExp = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
-  final RegExp _passwordRegExp = RegExp(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$');
+  final RegExp _passwordRegExp = RegExp(
+    r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$',
+  );
 
   Future<void> _loginUser() async {
-    
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _isLoading = true);
 
     final response = await AuthService.loginUser(
@@ -44,31 +45,37 @@ class _LoginScreenState extends State<LoginScreen> {
     if (response.statusCode == 200) {
       if (!mounted) return;
 
-      // ✅ Socket + Listener Setup
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final socketService = Provider.of<SocketService>(context, listen: false);
-      final messageProvider = Provider.of<MessageProvider>(context, listen: false);
+      final messageProvider = Provider.of<MessageProvider>(
+        context,
+        listen: false,
+      );
 
       if (userProvider.id != null && userProvider.id!.isNotEmpty) {
-        socketService.connect(userProvider.id!);
+        // ✅ Fetch group IDs before connecting
+        final groups = await GroupService.fetchGroups();
+        final groupIds = groups.map((group) => group["id"].toString()).toList();
 
-        // Attach our global message listener exactly ONCE
-        // Off any old listener (if any), then reattach
+        socketService.connect(
+          userProvider.id!,
+          groupIds,
+        ); // ✅ Fix: Pass both userId & groupIds
+
         socketService.listenForMessages((data) {
-          // Deduplicate by `data['id']` if your server provides unique IDs
           messageProvider.addMessage(data);
         });
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Login Successful!")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Login Successful!")));
       Navigator.pushReplacementNamed(context, '/home');
     } else {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Login Failed: ${response.body}")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Login Failed: ${response.body}")));
     }
   }
 
@@ -85,7 +92,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   const AuthHeading(
                     title: "Log in to Chatbox",
-                    subtitle: "Welcome back! Sign in with your email to continue.",
+                    subtitle:
+                        "Welcome back! Sign in with your email to continue.",
                   ),
 
                   // EMAIL
@@ -130,14 +138,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding: const EdgeInsets.only(top: 40, bottom: 20),
                     child: SizedBox(
                       width: 370,
-                      child: _isLoading
-                          ? const CircularProgressIndicator()
-                          : CustomButton(
-                              text: "Log in",
-                              onPressed: _loginUser,
-                              borderRadius: 16,
-                              useGradient: true,
-                            ),
+                      child:
+                          _isLoading
+                              ? const CircularProgressIndicator()
+                              : CustomButton(
+                                text: "Log in",
+                                onPressed: _loginUser,
+                                borderRadius: 16,
+                                useGradient: true,
+                              ),
                     ),
                   ),
 

@@ -7,7 +7,10 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "seed": "ts-node src/seedUsers.ts"
+    "seed": "ts-node src/seedUsers.ts",
+    "db:migrate": "sequelize db:migrate --debug",
+    "db:migrate:undo": "sequelize db:migrate:undo",
+    "db:migrate:undo:all": "sequelize db:migrate:undo:all"
   },
   "keywords": [],
   "author": "",
@@ -37,6 +40,8 @@
     "@types/multer": "^1.4.12",
     "@types/node": "^22.13.5",
     "@types/sequelize": "^4.28.20",
+    "sequelize-cli": "^6.6.2",
+    "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.7.3"
   }

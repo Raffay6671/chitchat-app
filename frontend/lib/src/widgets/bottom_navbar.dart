@@ -35,14 +35,28 @@ class BottomNavBar extends StatelessWidget {
         _buildNavItem("assets/icons/message.svg", "Messages", 0, currentIndex),
         _buildNavItem("assets/icons/calls.svg", "Calls", 1, currentIndex),
         _buildNavItem("assets/icons/contacts.svg", "Contacts", 2, currentIndex),
-        _buildNavItem("assets/icons/group.svg", "Groups", 3, currentIndex), // ✅ Group Icon
-        _buildNavItem("assets/icons/settings.svg", "Settings", 4, currentIndex), // ✅ Settings Icon
+        _buildNavItem(
+          "assets/icons/group.svg",
+          "Groups",
+          3,
+          currentIndex,
+        ), // ✅ Group Icon
+        _buildNavItem(
+          "assets/icons/settings.svg",
+          "Settings",
+          4,
+          currentIndex,
+        ), // ✅ Settings Icon
       ],
     );
   }
 
   BottomNavigationBarItem _buildNavItem(
-      String iconPath, String label, int index, int currentIndex) {
+    String iconPath,
+    String label,
+    int index,
+    int currentIndex,
+  ) {
     return BottomNavigationBarItem(
       icon: SvgPicture.asset(
         iconPath,
