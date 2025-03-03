@@ -92,13 +92,15 @@ class _ChatScreenState extends State<ChatScreen> {
     );
 
     final messageMap = {
-      'id':
-          DateTime.now().millisecondsSinceEpoch
-              .toString(), // generates unique ID
+      'id': DateTime.now().millisecondsSinceEpoch.toString(),
       'senderId': userProvider.id,
       'receiverId': widget.receiverId,
-      'message': _messageController.text,
+      'message': _messageController.text, // ✅ Send image URL if available
       'timestamp': DateTime.now().toIso8601String(),
+      'messageType':
+          _messageController.text.contains("/uploads/media/")
+              ? "image"
+              : "text", // ✅ Detect if it's an image
     };
 
     // Add to provider
@@ -109,18 +111,6 @@ class _ChatScreenState extends State<ChatScreen> {
     socketService.sendMessage(messageMap);
 
     _messageController.clear();
-  }
-
-  void _attachFile() {
-    print("Attach file");
-  }
-
-  void _openCamera() {
-    print("Open Camera");
-  }
-
-  void _recordAudio() {
-    print("Record Audio");
   }
 
   @override
@@ -169,9 +159,10 @@ class _ChatScreenState extends State<ChatScreen> {
             child: MessageInput(
               controller: _messageController,
               onSend: _sendMessage,
-              onAttach: _attachFile,
-              onCamera: _openCamera,
-              onMic: _recordAudio,
+              userId: userId, // ✅ Pass userId
+              receiverId:
+                  widget
+                      .receiverId, // ✅ Pass the receiverId (who is being messaged)
             ),
           ),
         ],
@@ -179,7 +170,12 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildChatBubble(bool isMe, String text, String time) {
+  Widget _buildChatBubble(bool isMe, String content, String time) {
+    bool isImage =
+        content.startsWith("/uploads/media/") ||
+        content.endsWith(".jpg") ||
+        content.endsWith(".png");
+
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -193,10 +189,27 @@ class _ChatScreenState extends State<ChatScreen> {
           crossAxisAlignment:
               isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            Text(
-              text,
-              style: TextStyle(color: isMe ? Colors.white : Colors.black),
-            ),
+            isImage
+                ? ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.network(
+                    "http://10.10.20.5:5000$content", // ✅ Append backend URL
+                    width: 200, // ✅ Set image size
+                    height: 200,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return const Center(child: CircularProgressIndicator());
+                    },
+                    errorBuilder:
+                        (context, error, stackTrace) =>
+                            const Icon(Icons.broken_image, size: 50),
+                  ),
+                )
+                : Text(
+                  content,
+                  style: TextStyle(color: isMe ? Colors.white : Colors.black),
+                ),
             const SizedBox(height: 5),
             Text(
               time,

@@ -83,6 +83,7 @@ com.example.adv_basics:style/TextAppearance.AppCompat.Widget.DropDownItem = 0x7f
 com.example.adv_basics:style/TextAppearance.AppCompat.Widget.Button.Colored = 0x7f0e0106
 com.example.adv_basics:style/TextAppearance.AppCompat.Widget.Button.Borderless.Colored = 0x7f0e0105
 com.example.adv_basics:style/TextAppearance.AppCompat.Widget.Button = 0x7f0e0104
+com.example.adv_basics:xml/flutter_image_picker_file_paths = 0x7f100000
 com.example.adv_basics:style/TextAppearance.AppCompat.Widget.ActionMode.Title.Inverse = 0x7f0e0103
 com.example.adv_basics:style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle.Inverse = 0x7f0e00fd
 com.example.adv_basics:style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle = 0x7f0e00fc

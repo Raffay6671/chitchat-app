@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 
 class SocketService with ChangeNotifier {
   io.Socket? _socket;
-
+  // ✅ Expose the socket instance
+  io.Socket? get socket => _socket;
   // ✅ Connect to WebSocket with user ID and groups
   void connect(String userId, List<String> groupIds) {
     if (_socket != null && _socket!.connected) return;

@@ -325,12 +325,13 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
                     if (response.statusCode == 201) {
                       final data = jsonDecode(response.body);
-                      print("✅ Group Created: $data");
+                      // print("✅ Group Created: $data");
 
                       // Get the new group id from the response
                       final newGroupId = data['group']['id'];
 
                       // Join the new group room
+
                       final socketService = Provider.of<SocketService>(
                         context,
                         listen: false,
@@ -343,9 +344,10 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                         true,
                       ); // 👈 Pass `true` to indicate success
                     } else {
-                      print("❌ Error creating group: ${response.body}");
+                      // print("❌ Error creating group: ${response.body}");
                     }
                   } catch (e) {
+                    // ignore: avoid_print
                     print("❌ Error creating group: $e");
                   }
                 },
@@ -415,6 +417,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     // ✅ Debugging: Print Updated Invited Members
     final invitedMembers =
         allUsers.where((user) => invitedUserIds.contains(user["id"])).toList();
+    // ignore: avoid_print
     print("✅ Updated Invited Members: $invitedMembers");
   }
 

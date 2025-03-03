@@ -21,12 +21,6 @@ class _HomeScreenState extends State<HomeScreen> {
     const SettingsScreen(),
   ];
 
-  void _onTabSelected(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

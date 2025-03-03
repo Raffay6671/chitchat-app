@@ -5,9 +5,12 @@ import dotenv from "dotenv";
 import sequelize from "./config/database";
 import authRoutes from "./routes/authRoutes";
 import path from "path";
+import mediaRoutes from "./routes/mediaRoutes";
+import messageRoutes from "./routes/mediaRoutes";
 
 import Message from "./models/message";
 import User from "./models/user"; // ✅ Import the User model
+import Media from "./models/media"; // ✅ Import the User model
 
 import GroupMessage from "./models/groupMessage"; // ✅ Group chat model
 import groupRoutes from "./routes/groupRoutes";
@@ -30,6 +33,9 @@ app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.use("/api/auth", authRoutes);
 app.use("/api/groups", groupRoutes);
+app.use("/api/media", mediaRoutes);
+app.use("/api/messages", messageRoutes);
+
 // (Optional) app.use("/api/groups", groupMessageRoutes);
 
 // ===== Example route: fetch 1:1 chat history =====
@@ -65,12 +71,22 @@ io.on("connection", (socket) => {
   // ===== A) "join" personal & group rooms =====
   // data = { userId: "xyz123", groupIds: ["gid1", "gid2", ...] }
   socket.on("join", (data: { userId: string; groupIds?: string[] }) => {
-    const { userId, groupIds } = data;
+    const { userId, groupIds } = data; // ✅ Move destructuring to the top
+
+    onlineUsers.set(userId, socket.id);
+
+    // ✅ Notify all clients that this user is online
+    io.emit("userOnline", { userId });
+
+    console.log(`🔵 ${userId} is now online with socket ID: ${socket.id}`);
+
+    // ✅ Send updated list of online users to the joining user
+    io.to(socket.id).emit("onlineUsers", Array.from(onlineUsers.keys()));
+
     console.log(`🔗 ${userId} joined with socket ID: ${socket.id}`);
 
     // 1) Join personal room
     socket.join(userId);
-    onlineUsers.set(userId, socket.id);
 
     // 2) Also join each group room if needed
     if (groupIds && groupIds.length > 0) {
@@ -83,26 +99,49 @@ io.on("connection", (socket) => {
 
   // ===== B) Direct Message Event (1-to-1) =====
   socket.on("sendMessage", async (data) => {
-    // data = { senderId, receiverId, message, timestamp }
-    console.log("📩 Private message received:", data);
+    console.log("📩 Message received:", data);
 
     try {
-      // Save to DB (1:1 chat)
-      const newMessage = await Message.create({
+      let newMessage;
+      if (data.mediaUrl) {
+        // Media message
+        newMessage = await Message.create({
+          senderId: data.senderId,
+          receiverId: data.receiverId,
+          messageType: data.mediaType, // 'image' | 'video'
+          content: data.mediaUrl, // Store URL
+        });
+
+        // Save media to DB
+        await Media.create({
+          userId: data.senderId,
+          messageId: newMessage.id,
+          mediaType: data.mediaType,
+          mediaUrl: data.mediaUrl,
+        });
+      } else {
+        // Text message
+        newMessage = await Message.create({
+          senderId: data.senderId,
+          receiverId: data.receiverId,
+          messageType: "text",
+          content: data.message,
+        });
+      }
+
+      // Emit message to receiver
+      io.to(data.receiverId).emit("receiveMessage", {
+        id: newMessage.id,
         senderId: data.senderId,
         receiverId: data.receiverId,
-        messageType: "text",
-        content: data.message,
-      });
-
-      // Emit to the receiver's personal room
-      io.to(data.receiverId).emit("receiveMessage", {
-        ...data,
+        messageType: data.mediaType || "text",
+        content: data.mediaUrl || data.message,
         createdAt: newMessage.createdAt,
       });
-      console.log(`📤 Sent 1-to-1 message to room: ${data.receiverId}`);
+
+      console.log(`📤 Sent message to ${data.receiverId}`);
     } catch (error) {
-      console.error("❌ Error saving 1-to-1 message:", error);
+      console.error("❌ Error sending message:", error);
     }
   });
 
@@ -155,6 +194,11 @@ io.on("connection", (socket) => {
     for (const [userId, sockId] of onlineUsers.entries()) {
       if (sockId === socket.id) {
         onlineUsers.delete(userId);
+
+        // ✅ Notify all clients that this user is now offline
+        io.emit("userOffline", { userId });
+
+        console.log(`⚫ ${userId} is now offline`);
         break;
       }
     }

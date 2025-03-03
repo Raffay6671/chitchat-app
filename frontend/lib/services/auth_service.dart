@@ -50,6 +50,8 @@ class AuthService {
     required String password,
     required BuildContext context,
   }) async {
+    // Capture the provider instance now, before any await.
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/login'),
@@ -62,8 +64,8 @@ class AuthService {
         await saveTokens(data['accessToken'], data['refreshToken']);
         _logger.info("✅ Tokens saved successfully");
 
-        // ✅ Save all user data using Provider
-        Provider.of<UserProvider>(context, listen: false).setUserData(
+        // Now use the stored provider instance.
+        userProvider.setUserData(
           id: data['user']['id'],
           username: data['user']['username'],
           email: data['user']['email'],
@@ -123,7 +125,9 @@ class AuthService {
         return true;
       } else if (response.statusCode == 401) {
         await logout();
+        // ignore: use_build_context_synchronously
         Navigator.pushReplacementNamed(context, '/login');
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Session expired. Please log in again.")),
         );
@@ -155,6 +159,7 @@ class AuthService {
 
     if (refreshToken != null) {
       try {
+        // ignore: use_build_context_synchronously
         bool refreshed = await refreshAccessToken(context);
         final newAccessToken = prefs.getString('accessToken');
         return newAccessToken != null && refreshed;
@@ -183,6 +188,7 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        // ignore: use_build_context_synchronously
         Provider.of<UserProvider>(context, listen: false).setUserData(
           id: data['user']['id'],
           username: data['user']['username'],

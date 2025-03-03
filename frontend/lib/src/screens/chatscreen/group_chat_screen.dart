@@ -7,6 +7,7 @@ import '../../../services/auth_service.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../widgets/group_message_bubble.dart';
+import '../../widgets/message_input.dart'; // ✅ Added Import
 
 class GroupChatScreen extends StatefulWidget {
   final String groupId;
@@ -29,7 +30,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   @override
   void initState() {
     super.initState();
-    // Ensure this user joins the group room
     final socketService = Provider.of<SocketService>(context, listen: false);
     socketService.joinGroup(widget.groupId);
     _fetchGroupHistory();
@@ -38,14 +38,13 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
   Future<void> _fetchGroupHistory() async {
     setState(() => _isLoading = true);
-
     final groupMessageProvider = Provider.of<GroupMessageProvider>(
       context,
       listen: false,
     );
 
     try {
-      final token = await AuthService.getAccessToken(); // ✅ Fetch token
+      final token = await AuthService.getAccessToken();
       if (token == null) {
         debugPrint("🚨 ERROR: Access token is missing!");
         return;
@@ -59,11 +58,9 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         url,
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer $token", // ✅ Ensure token is included
+          "Authorization": "Bearer $token",
         },
       );
-
-      debugPrint('Heavy System Response: ${res.body}');
 
       if (res.statusCode == 200) {
         final data = json.decode(res.body) as Map<String, dynamic>;
@@ -74,22 +71,15 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               return {
                 'id': msg['id'],
                 'senderId': msg['senderId'],
-                'senderName':
-                    msg['senderName'] ??
-                    "Unknown", // ✅ Ensure sender name is stored
-                'senderProfilePic':
-                    msg['senderProfilePic'] ??
-                    "", // ✅ Ensure profile pic is stored
+                'senderName': msg['senderName'] ?? "Unknown",
+                'senderProfilePic': msg['senderProfilePic'] ?? "",
                 'groupId': msg['groupId'],
                 'content': msg['content'],
-                'createdAt':
-                    msg['createdAt'] ??
-                    "Unknown time", // ✅ Prevent null timestamps
+                'createdAt': msg['createdAt'] ?? "Unknown time",
               };
             }).toList();
 
         groupMessageProvider.setMessages(widget.groupId, history);
-        debugPrint("✅ Group chat history loaded: ${history.length} messages");
       } else {
         debugPrint("❌ Failed to fetch group chat history: ${res.body}");
       }
@@ -107,20 +97,14 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       listen: false,
     );
 
-    // ✅ Remove old listener to prevent duplication
     socketService.removeGroupListeners();
 
-    // ✅ Listen for new messages
     socketService.listenForGroupMessages((data) {
       if (data['groupId'] == widget.groupId) {
-        debugPrint('📩 Received WebSocket message: ${data['content']}');
-
-        // ✅ Add the message and trigger UI update
         groupMessageProvider.addMessage(widget.groupId, data);
 
-        // ✅ Ensure UI updates immediately
         if (mounted) {
-          setState(() {}); // ✅ Force UI rebuild
+          setState(() {});
         }
       }
     });
@@ -142,12 +126,9 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       'senderId': userProvider.id,
       'groupId': widget.groupId,
       'content': _messageController.text,
-      // ❌ Do NOT add 'createdAt' here! The backend should set it
     };
 
-    // ✅ Send only via WebSocket, do NOT add message locally
     socketService.sendGroupMessage(widget.groupId, messageMap);
-
     _messageController.clear();
   }
 
@@ -166,8 +147,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         body: Column(
           children: [
             if (_isLoading) const LinearProgressIndicator(),
-
-            // ✅ Display chat messages
             Expanded(
               child:
                   groupMessages.isEmpty
@@ -186,10 +165,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                               ).id;
 
                           return GroupMessageBubble(
-                            senderName:
-                                message['senderName'], // ✅ Ensure senderName is passed
-                            senderProfilePic:
-                                message['senderProfilePic'], // ✅ Ensure profilePic is passed
+                            senderName: message['senderName'],
+                            senderProfilePic: message['senderProfilePic'],
                             message: message['content'],
                             timestamp: message['createdAt'],
                             isMe: isMe,
@@ -198,37 +175,18 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                       ),
             ),
 
-            // ✅ Input field for sending messages
-            _buildMessageInput(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ✅ Message input field
-  Widget _buildMessageInput() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.grey, width: 0.5)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _messageController,
-              decoration: const InputDecoration.collapsed(
-                hintText: "Type a message...",
+            // ✅ Message Input with Send Button
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: MessageInput(
+                controller: _messageController,
+                onSend: _sendMessage,
+                userId: Provider.of<UserProvider>(context, listen: false).id!,
+                receiverId: widget.groupId, // ✅ Pass groupId instead
               ),
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.send, color: Colors.blueAccent),
-            onPressed: _sendMessage,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

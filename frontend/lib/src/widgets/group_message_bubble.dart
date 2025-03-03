@@ -9,13 +9,13 @@ class GroupMessageBubble extends StatelessWidget {
   final bool isMe;
 
   const GroupMessageBubble({
-    Key? key,
+    super.key,
     required this.senderName,
     required this.senderProfilePic,
     required this.message,
     required this.timestamp,
     required this.isMe,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +26,7 @@ class GroupMessageBubble extends StatelessWidget {
         dateTime =
             DateTime.parse(timestamp!).toLocal(); // ✅ Convert to local timezone
       } catch (e) {
+        // ignore: avoid_print
         print("❌ Error parsing timestamp: $timestamp");
       }
     }
@@ -79,18 +80,45 @@ class GroupMessageBubble extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     constraints: BoxConstraints(
-                      maxWidth:
-                          MediaQuery.of(context).size.width *
-                          0.75, // ✅ Responsive width
+                      maxWidth: MediaQuery.of(context).size.width * 0.75,
                     ),
-                    child: Text(
-                      message,
-                      style: TextStyle(
-                        color: isMe ? Colors.white : Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),
+                    child:
+                        (message.startsWith("/uploads/media/") ||
+                                message.endsWith(".jpg") ||
+                                message.endsWith(".png"))
+                            ? ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(
+                                "http://10.10.20.5:5000$message", // Append backend URL
+                                width: 200,
+                                height: 200,
+                                fit: BoxFit.cover,
+                                loadingBuilder: (
+                                  context,
+                                  child,
+                                  loadingProgress,
+                                ) {
+                                  if (loadingProgress == null) return child;
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                },
+                                errorBuilder:
+                                    (context, error, stackTrace) => const Icon(
+                                      Icons.broken_image,
+                                      size: 50,
+                                    ),
+                              ),
+                            )
+                            : Text(
+                              message,
+                              style: TextStyle(
+                                color: isMe ? Colors.white : Colors.black,
+                                fontSize: 16,
+                              ),
+                            ),
                   ),
+
                   const SizedBox(
                     height: 4,
                   ), // ✅ Space between message and timestamp

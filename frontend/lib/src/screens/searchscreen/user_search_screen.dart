@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/group_service.dart'; // ✅ Import group service
-import '../../providers/user_provider.dart';
 import '../chatscreen/chat_screen.dart';
 import '../chatscreen/group_chat_screen.dart'; // ✅ Import group chat screen
 import '../../widgets/group_collage_avatar.dart'; // ✅ Group avatar for displaying group users
@@ -67,7 +65,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print("❌ Error fetching users & groups: $e");
+      // print("❌ Error fetching users & groups: $e");
       setState(() => _isLoading = false);
     }
   }
@@ -86,7 +84,6 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
   }
 
   Widget _buildItemTile(Map<String, dynamic> item) {
-    final userId = Provider.of<UserProvider>(context, listen: false).id;
     final isGroup = item["type"] == "group";
 
     return Container(
@@ -96,7 +93,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withAlpha(13),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
