@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../config.dart';
 
 class GroupService {
-  static const String baseUrl = 'http://10.10.20.5:5000/api/groups';
+  static const String baseUrl = '${AppConfig.serverIp}/api/groups';
 
   // ✅ Fetch all groups the user is part of
   static Future<List<Map<String, dynamic>>> fetchGroups() async {

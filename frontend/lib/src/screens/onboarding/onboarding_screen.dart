@@ -11,6 +11,9 @@ class OnboardingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ Get screen height dynamically
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -32,10 +35,10 @@ class OnboardingScreen extends StatelessWidget {
           children: [
             // Main Heading Text
             Positioned(
-              top: 85,
+              top: screenHeight * 0.12, // ✅ 12% from the top (Responsive)
               left: 26,
               child: SizedBox(
-                width: 338,
+                width: 350,
                 child: Text(
                   "Connect friends easily & quickly",
                   style: AppTextStyles.onboardingTitle,
@@ -48,7 +51,7 @@ class OnboardingScreen extends StatelessWidget {
 
             // Subheading Paragraph
             Positioned(
-              top: 470,
+              top: screenHeight * 0.58, // ✅ 55% of the screen height
               left: 26,
               child: SizedBox(
                 width: 327,
@@ -60,10 +63,9 @@ class OnboardingScreen extends StatelessWidget {
               ),
             ),
 
-            // Reusable Sign-Up Button (Horizontally Centered)
-            // Reusable Sign-Up Button (Horizontally Centered)
+            // Sign-Up Button (Horizontally Centered)
             Positioned(
-              top: 670,
+              top: screenHeight * 0.75, // ✅ 75% of the screen height
               left: 0,
               right: 0,
               child: Center(
@@ -71,7 +73,6 @@ class OnboardingScreen extends StatelessWidget {
                   text: "Sign up with email",
                   backgroundColor: AppColors.semiTransparentWhite,
                   onPressed: () {
-                    // Navigate to Sign Up Page
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -86,7 +87,7 @@ class OnboardingScreen extends StatelessWidget {
 
             // Existing Account Text with "Log in" Link
             Positioned(
-              top: 790,
+              top: screenHeight * 0.85, // ✅ Adjusted for better visibility
               left: 0,
               right: 0,
               child: Center(
@@ -95,17 +96,15 @@ class OnboardingScreen extends StatelessWidget {
                   height: 20,
                   child: RichText(
                     text: TextSpan(
-                      style:
-                          AppTextStyles.existingAccountText, // Main text style
+                      style: AppTextStyles.existingAccountText,
                       children: [
                         const TextSpan(text: "Existing account? "),
                         TextSpan(
                           text: "Log in",
-                          style: AppTextStyles.loginLinkText, // Link style
+                          style: AppTextStyles.loginLinkText,
                           recognizer:
                               TapGestureRecognizer()
                                 ..onTap = () {
-                                  // Navigate to the Login Page
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(

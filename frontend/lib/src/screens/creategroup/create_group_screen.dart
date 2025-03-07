@@ -5,7 +5,9 @@ import '../../constants/colors.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/group_service.dart';
 import '../../../services/socket_service.dart';
+import '../../../config.dart';
 import 'dart:convert';
+import '../../screens/messages/message_screen.dart'; // ✅ Import MessageScreen
 
 class CreateGroupScreen extends StatefulWidget {
   const CreateGroupScreen({super.key});
@@ -45,7 +47,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       final pic = user["profilePicture"] ?? "";
       // If it doesn't start with "http", prepend your base URL
       if (pic.isNotEmpty && !pic.startsWith('http')) {
-        user["profilePicture"] = "http://10.10.20.5:5000$pic";
+        user["profilePicture"] = "${AppConfig.serverIp}$pic";
       }
     }
 
@@ -180,7 +182,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                           (loggedInUserProfile != null &&
                                   loggedInUserProfile.isNotEmpty)
                               ? NetworkImage(
-                                "http://10.10.20.5:5000$loggedInUserProfile",
+                                "${AppConfig.serverIp}$loggedInUserProfile",
                               ) // ✅ Correctly Fetched Profile Picture
                               : null,
                       child:

@@ -28,54 +28,63 @@ class _LoginScreenState extends State<LoginScreen> {
   final RegExp _passwordRegExp = RegExp(
     r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$',
   );
-
   Future<void> _loginUser() async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+    });
 
-    final response = await AuthService.loginUser(
-      email: _emailController.text.trim(),
-      password: _passwordController.text.trim(),
-      context: context,
-    );
-
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-
-    if (response.statusCode == 200) {
-      if (!mounted) return;
-
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final socketService = Provider.of<SocketService>(context, listen: false);
-      final messageProvider = Provider.of<MessageProvider>(
-        context,
-        listen: false,
+    try {
+      final response = await AuthService.loginUser(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+        context: context,
       );
 
-      if (userProvider.id != null && userProvider.id!.isNotEmpty) {
-        // ✅ Fetch group IDs before connecting
-        final groups = await GroupService.fetchGroups();
-        final groupIds = groups.map((group) => group["id"].toString()).toList();
+      if (response.statusCode == 200) {
+        if (!mounted) return;
 
-        socketService.connect(
-          userProvider.id!,
-          groupIds,
-        ); // ✅ Fix: Pass both userId & groupIds
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        final socketService = Provider.of<SocketService>(
+          context,
+          listen: false,
+        );
+        final messageProvider = Provider.of<MessageProvider>(
+          context,
+          listen: false,
+        );
 
-        socketService.listenForMessages((data) {
-          messageProvider.addMessage(data);
-        });
+        if (userProvider.id != null && userProvider.id!.isNotEmpty) {
+          final groups = await GroupService.fetchGroups();
+          final groupIds =
+              groups.map((group) => group["id"].toString()).toList();
+
+          socketService.connect(userProvider.id!, groupIds);
+
+          socketService.listenForMessages((data) {
+            messageProvider.addMessage(data);
+          });
+        }
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Login Successful!")));
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        if (!mounted) return;
+        setState(() => _isLoading = false); // ✅ Reset loader here
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Login Failed: ${response.body}")),
+        );
       }
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _isLoading = false); // ✅ Ensure loader resets on errors
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("Login Successful!")));
-      Navigator.pushReplacementNamed(context, '/home');
-    } else {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Login Failed: ${response.body}")));
+      ).showSnackBar(SnackBar(content: Text("Error: $error")));
     }
   }
 

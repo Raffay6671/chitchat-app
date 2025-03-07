@@ -62,12 +62,12 @@ class _CallUserContainerState extends State<ContactUsersContainer> {
     return Expanded(
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(25.0),
         decoration: const BoxDecoration(
           color: AppColors.white, // ✅ Using Centralized Color
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
+            topLeft: Radius.circular(70),
+            topRight: Radius.circular(70),
           ),
         ),
         child: Column(

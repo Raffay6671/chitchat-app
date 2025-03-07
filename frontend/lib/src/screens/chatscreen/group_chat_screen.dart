@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../widgets/group_message_bubble.dart';
 import '../../widgets/message_input.dart'; // ✅ Added Import
+import '../../../config.dart';
 
 class GroupChatScreen extends StatefulWidget {
   final String groupId;
@@ -24,14 +25,30 @@ class GroupChatScreen extends StatefulWidget {
 }
 
 class _GroupChatScreenState extends State<GroupChatScreen> {
+  int totalMembers = 0; // Store total members count
+  int onlineMembers = 0; // Store online members count
+
   final TextEditingController _messageController = TextEditingController();
   bool _isLoading = false;
 
   @override
+  @override
   void initState() {
     super.initState();
     final socketService = Provider.of<SocketService>(context, listen: false);
+
     socketService.joinGroup(widget.groupId);
+
+    // Pass `mounted` to the fetchGroupMembers method
+    socketService.fetchGroupMembers(widget.groupId, (total, online) {
+      if (mounted) {
+        setState(() {
+          totalMembers = total;
+          onlineMembers = online;
+        });
+      }
+    }, mounted); // Pass mounted here
+
     _fetchGroupHistory();
     _setupSocketListeners();
   }
@@ -51,7 +68,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       }
 
       final url = Uri.parse(
-        'http://10.10.20.5:5000/api/groups/${widget.groupId}/messages',
+        '${AppConfig.serverIp}/api/groups/${widget.groupId}/messages',
       );
 
       final res = await http.get(
@@ -137,13 +154,107 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     final groupMessages = Provider.of<GroupMessageProvider>(
       context,
     ).getMessages(widget.groupId);
+    // title: Text(widget.groupName),
 
     return SafeArea(
       child: Scaffold(
+        backgroundColor: Colors.white, // Set background color to white
+
         appBar: AppBar(
-          title: Text(widget.groupName),
-          backgroundColor: Colors.blueAccent,
+          backgroundColor: Colors.white, // Set AppBar background color to white
+          elevation: 0, // Remove shadow
+          scrolledUnderElevation: 0, // Prevent shadow on scroll
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 2.0), // Adjust padding
+            child: IconButton(
+              icon: Image.asset(
+                'assets/icons/leftNav.png', // Custom left arrow
+                height: 24,
+                width: 15,
+              ),
+              onPressed: () {
+                Navigator.pop(context); // Go back
+              },
+            ),
+          ),
+          title: Row(
+            children: [
+              // ✅ Group Icon
+              CircleAvatar(
+                backgroundImage: AssetImage('assets/icons/group.png'),
+                radius: 22,
+              ),
+              const SizedBox(width: 8), // Space between icon and name
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ✅ Group Name
+                    Text(
+                      widget.groupName,
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        height: 1.0,
+                        letterSpacing: 0,
+                        color: Colors.black,
+                      ),
+                      overflow: TextOverflow.ellipsis, // Prevents overflow
+                    ),
+                    const SizedBox(height: 4),
+                    // ✅ Dynamic Members Count
+                    Text(
+                      "$totalMembers members, $onlineMembers online",
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w400,
+                        fontSize: 12,
+                        height: 1.0,
+                        letterSpacing: 0,
+                        color: Color.fromARGB(
+                          211,
+                          114,
+                          126,
+                          122,
+                        ), // Light grey color
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 1.0),
+              child: IconButton(
+                icon: ImageIcon(
+                  AssetImage('assets/icons/call.png'),
+                  color: Colors.black,
+                ),
+                iconSize: 30,
+                onPressed: () {
+                  // Handle call action
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 10.0),
+              child: IconButton(
+                icon: ImageIcon(
+                  AssetImage('assets/icons/Video.png'),
+                  color: Colors.black,
+                ),
+                iconSize: 40,
+                onPressed: () {
+                  // Handle video call action
+                },
+              ),
+            ),
+          ],
         ),
+
         body: Column(
           children: [
             if (_isLoading) const LinearProgressIndicator(),

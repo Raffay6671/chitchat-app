@@ -3,9 +3,10 @@ import 'dart:io'; // ✅ Import for File class
 import 'package:path/path.dart'; // ✅ Import for basename function
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
+import '../config.dart';
 
 class MediaService {
-  static const String _baseUrl = "http://10.10.20.5:5000"; // Your backend URL
+  static const String _baseUrl = AppConfig.serverIp; // Your backend URL
 
   // ✅ Create a message first and return its ID
   static Future<String?> createMessage(

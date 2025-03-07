@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../../../services/auth_service.dart';
+import '../../config.dart';
 
 class StatusBar extends StatelessWidget {
   const StatusBar({super.key});
@@ -42,7 +43,7 @@ class StatusBar extends StatelessWidget {
                             backgroundImage:
                                 profilePicture != null
                                     ? NetworkImage(
-                                      'http://10.10.20.5:5000$profilePicture',
+                                      '${AppConfig.serverIp}$profilePicture',
                                     )
                                     : null,
                             child:
@@ -90,7 +91,20 @@ class StatusBar extends StatelessWidget {
                   future: AuthService.fetchAllUsers(context),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator(); // Loading
+                      return SizedBox(
+                        height: 100, // Match Status Bar Height
+                        width: double.infinity, // ✅ Take full width
+                        child: Row(
+                          mainAxisAlignment:
+                              MainAxisAlignment.center, // ✅ Centers the loader
+                          children: [
+                            CircularProgressIndicator(
+                              strokeWidth: 3,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                      );
                     }
 
                     if (snapshot.hasData) {
@@ -109,7 +123,7 @@ class StatusBar extends StatelessWidget {
                                         CircleAvatar(
                                           radius: 30,
                                           backgroundImage: NetworkImage(
-                                            'http://10.10.20.5:5000${user["profilePicture"]}',
+                                            '${AppConfig.serverIp}${user["profilePicture"]}',
                                           ),
                                         ),
                                         const SizedBox(height: 8),

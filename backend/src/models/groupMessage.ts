@@ -9,6 +9,7 @@ interface GroupMessageAttributes {
   groupId: string;
   messageType: string;
   content: string;
+  seenBy?: string[]; // ✅ Track which users have seen this message
   createdAt?: Date;
 }
 
@@ -24,6 +25,8 @@ class GroupMessage
   public groupId!: string;
   public messageType!: string;
   public content!: string;
+  public seenBy?: string[];
+
   public createdAt?: Date;
 
   // ✅ Add sender as an association
@@ -59,6 +62,11 @@ GroupMessage.init(
     content: {
       type: DataTypes.TEXT,
       allowNull: false,
+    },
+    seenBy: {
+      type: DataTypes.ARRAY(DataTypes.STRING), // ✅ Track seen users
+      allowNull: true,
+      defaultValue: [],
     },
   },
   {

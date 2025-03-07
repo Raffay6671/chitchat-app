@@ -10,6 +10,7 @@ interface UserAttributes {
   password: string;
   displayName?: string;
   profilePicture?: string;
+  refreshToken?: string | null; // ✅ Add refreshToken attribute
 }
 
 interface UserCreationAttributes extends Optional<UserAttributes, "id"> {}
@@ -24,6 +25,7 @@ class User
   public password!: string;
   public displayName?: string;
   public profilePicture?: string;
+  public refreshToken?: string | null; // ✅ Add refreshToken property
 }
 
 User.init(
@@ -52,7 +54,12 @@ User.init(
     },
     profilePicture: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: true, // ✅ Allow it to be null
+      defaultValue: "/uploads/default-avatar.png", // ✅ Default Profile Picture
+    },
+    refreshToken: {
+      type: DataTypes.STRING, // ✅ Add refreshToken column
+      allowNull: true, // User might not have a refresh token initially
     },
   },
   {

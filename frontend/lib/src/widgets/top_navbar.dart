@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../screens/searchscreen/user_search_screen.dart';
+import '../../config.dart';
 
 class TopNavBar extends StatelessWidget {
   const TopNavBar({super.key});
@@ -10,6 +11,11 @@ class TopNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final profilePicture = Provider.of<UserProvider>(context).profilePicture;
+
+    print("Profile Picture: $profilePicture");
+    print(
+      "Profile picture URL***MSMSMSS: ${AppConfig.serverIp}$profilePicture",
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -57,7 +63,7 @@ class TopNavBar extends StatelessWidget {
                   child:
                       profilePicture != null
                           ? Image.network(
-                            'http://10.10.20.5:5000$profilePicture',
+                            '${AppConfig.serverIp}$profilePicture',
                             fit: BoxFit.cover,
                           )
                           : Icon(

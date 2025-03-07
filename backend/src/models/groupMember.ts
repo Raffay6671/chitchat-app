@@ -1,7 +1,12 @@
-import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../config/database';
-import Group from './group'; // ✅ Changed to default import
-import User from './user'; // ✅ Keep default import
+import {
+  DataTypes,
+  Model,
+  Optional,
+  BelongsToGetAssociationMixin,
+} from "sequelize";
+import sequelize from "../config/database";
+import Group from "./group";
+import User from "./user";
 
 // Interface for GroupMember attributes
 interface GroupMemberAttributes {
@@ -11,13 +16,23 @@ interface GroupMemberAttributes {
 }
 
 // Optional fields for creation
-interface GroupMemberCreationAttributes extends Optional<GroupMemberAttributes, 'joinedAt'> {}
+interface GroupMemberCreationAttributes
+  extends Optional<GroupMemberAttributes, "joinedAt"> {}
 
 // Define GroupMember model
-class GroupMember extends Model<GroupMemberAttributes, GroupMemberCreationAttributes> implements GroupMemberAttributes {
+class GroupMember
+  extends Model<GroupMemberAttributes, GroupMemberCreationAttributes>
+  implements GroupMemberAttributes
+{
   public groupId!: string;
   public userId!: string;
   public joinedAt?: Date;
+
+  // ✅ Fix: Explicitly define the `user` property for TypeScript
+  public user?: User;
+
+  // ✅ Fix: Explicitly add a Sequelize method to fetch the User association
+  public getUser!: BelongsToGetAssociationMixin<User>;
 }
 
 // Initialize GroupMember schema
@@ -27,8 +42,8 @@ GroupMember.init(
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: Group, // ✅ Correctly referenced with default import
-        key: 'id',
+        model: Group,
+        key: "id",
       },
       primaryKey: true,
     },
@@ -36,8 +51,8 @@ GroupMember.init(
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: User, // ✅ Correctly referenced with default import
-        key: 'id',
+        model: User,
+        key: "id",
       },
       primaryKey: true,
     },
@@ -47,13 +62,15 @@ GroupMember.init(
     },
   },
   {
-    sequelize, // ✅ Pass the sequelize instance
-    modelName: 'GroupMember', // ✅ Name of the model
-    tableName: 'group_members', // ✅ Explicit table name
-    underscored: true, // ✅ Use snake_case for consistency
-    timestamps: false, // ✅ No automatic timestamps
+    sequelize,
+    modelName: "GroupMember",
+    tableName: "group_members",
+    underscored: true,
+    timestamps: false,
   }
 );
 
-// Export the model
+// ✅ Ensure Sequelize knows the GroupMember has a User
+GroupMember.belongsTo(User, { foreignKey: "userId", as: "user" });
+
 export default GroupMember;

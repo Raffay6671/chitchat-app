@@ -51,7 +51,7 @@ class ContactsScreen extends StatelessWidget {
                       "assets/icons/addcall.svg", // ✅ Example of a different right icon
                 ),
                 const SizedBox(
-                  height: 20,
+                  height: 45,
                 ), // ✅ Space between navbar & container
                 const ContactUsersContainer(), // ✅ Contact List from Phone Book
               ],

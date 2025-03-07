@@ -3,12 +3,14 @@ import {
   registerUser,
   loginUser,
   refreshAccessToken,
+  logoutUser,
 } from "../controllers/authController";
 import { verifyAccessToken } from "../middlewares/authMiddleware"; // ✅ Import token verification middleware
 import { upload } from "../middlewares/uploadMiddleware";
 import { uploadProfilePicture } from "../controllers/authController";
 import { getUserData } from "../controllers/authController";
 import { getAllUsers } from "../controllers/authController";
+import User from "../models/user";
 
 const router = Router();
 
@@ -55,6 +57,15 @@ router.post(
 router.get("/user", verifyAccessToken, getUserData);
 
 router.get("/users", verifyAccessToken, getAllUsers); // New route to fetch all users
+// ✅ Logout route (Register it properly)
+router.post("/logout", async (req: Request, res: Response) => {
+  try {
+    await logoutUser(req, res);
+  } catch (error) {
+    console.error("Logout Error:", error);
+    res.status(500).json({ message: "Internal server error during logout" });
+  }
+});
 
 // ✅ Protected route - Requires valid Access Token
 router.get("/protected", verifyAccessToken, (req: Request, res: Response) => {

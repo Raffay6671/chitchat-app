@@ -7,6 +7,9 @@ import '../../../services/socket_service.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/message_provider.dart';
 import '../../widgets/message_input.dart'; // ✅ Added Import
+import '../../../config.dart';
+import '../../widgets/p2p_messagebubble.dart';
+import '../../widgets/profile_avatar.dart';
 
 class ChatScreen extends StatefulWidget {
   final String receiverId;
@@ -52,7 +55,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     try {
       final url = Uri.parse(
-        'http://10.10.20.5:5000/api/messages/$myId/$theirId',
+        '${AppConfig.serverIp}/api/messages/$myId/$theirId',
       );
       final res = await http.get(url);
 
@@ -66,7 +69,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 'id': msg['id'],
                 'senderId': msg['senderId'],
                 'receiverId': msg['receiverId'],
-                'message': msg['content'],
+                'senderProfilePic':
+                    msg['senderProfilePic'] ?? '', // ✅ Add sender profile
+                'receiverProfilePic':
+                    msg['receiverProfilePic'] ?? '', // ✅ Add receiver profile
+                'content': msg['content'],
                 'createdAt': msg['createdAt'],
               };
             }).toList();
@@ -93,14 +100,19 @@ class _ChatScreenState extends State<ChatScreen> {
 
     final messageMap = {
       'id': DateTime.now().millisecondsSinceEpoch.toString(),
-      'senderId': userProvider.id,
-      'receiverId': widget.receiverId,
-      'message': _messageController.text, // ✅ Send image URL if available
+      'senderId':
+          userProvider.id ?? "unknown_sender", // ✅ Provide default value
+      'receiverId':
+          widget.receiverId ?? "unknown_receiver", // ✅ Provide default value
+      'content':
+          _messageController.text.isNotEmpty
+              ? _messageController.text
+              : "[Empty Message]", // ✅ Avoid null messages
       'timestamp': DateTime.now().toIso8601String(),
       'messageType':
           _messageController.text.contains("/uploads/media/")
               ? "image"
-              : "text", // ✅ Detect if it's an image
+              : "text",
     };
 
     // Add to provider
@@ -121,23 +133,91 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final socketService = Provider.of<SocketService>(context);
+    final isOnline = socketService.isUserOnline(widget.receiverId);
+
+    print("Receiver Profile Image***** URL: ${widget.receiverProfileImage}");
+
     final userId = Provider.of<UserProvider>(context).id ?? '';
     final messages = Provider.of<MessageProvider>(context).messages;
+    print("Receiver Profile Image URL: ${widget.receiverProfileImage}");
 
     return Scaffold(
+      backgroundColor: Colors.white, // Set background color to white
+
       appBar: AppBar(
+        backgroundColor: Colors.white, // Set background color to white
+        elevation: 0, // Removes the shadow to match the background seamlessly
+        scrolledUnderElevation: 0, // Ensures no shadow appears when scrolled
         title: Row(
           children: [
             if (widget.receiverProfileImage != null)
-              CircleAvatar(
-                backgroundImage: NetworkImage(widget.receiverProfileImage!),
-                radius: 18,
+              ProfileAvatar(
+                imageUrl: widget.receiverProfileImage!,
+                size: 18,
+                isOnline: isOnline,
               ),
             const SizedBox(width: 8),
-            Text(widget.receiverName),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.receiverName,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    height: 1.0,
+                    letterSpacing: 0,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  isOnline ? "Active Now" : "Offline Now",
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w400,
+                    fontSize: 12,
+                    height: 1.0,
+                    letterSpacing: 0,
+                    color: isOnline ? Colors.green : Colors.grey,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 1.0),
+            child: IconButton(
+              icon: ImageIcon(
+                AssetImage('assets/icons/call.png'), // Path to call icon
+                color: Colors.black,
+              ),
+              iconSize: 30, // Set icon size
+              onPressed: () {
+                // Handle call action
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 10.0),
+            child: IconButton(
+              icon: ImageIcon(
+                AssetImage('assets/icons/Video.png'), // Path to video icon
+                color: Colors.black,
+              ),
+              iconSize: 40, // Increase the icon size to scale it
+              onPressed: () {
+                // Handle video call action
+              },
+            ),
+          ),
+        ],
       ),
+
       body: Column(
         children: [
           if (_isLoadingHistory) const LinearProgressIndicator(),
@@ -149,8 +229,23 @@ class _ChatScreenState extends State<ChatScreen> {
                 final msg = messages[messages.length - 1 - i];
                 final isMe = (msg['senderId'] == userId);
                 final createdAt = msg['createdAt'] ?? msg['timestamp'] ?? '';
+                final messageContent = msg['content'] ?? '[Empty]';
 
-                return _buildChatBubble(isMe, msg['message'], createdAt);
+                return P2PMessageBubble(
+                  senderName: isMe ? 'You' : widget.receiverName,
+                  senderProfilePic:
+                      isMe
+                          ? (Provider.of<UserProvider>(
+                                context,
+                              ).profilePicture ??
+                              '')
+                          : msg['receiverProfilePic'] ??
+                              widget.receiverProfileImage ??
+                              '',
+                  message: messageContent,
+                  timestamp: createdAt,
+                  isMe: isMe,
+                );
               },
             ),
           ),
@@ -166,60 +261,6 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildChatBubble(bool isMe, String content, String time) {
-    bool isImage =
-        content.startsWith("/uploads/media/") ||
-        content.endsWith(".jpg") ||
-        content.endsWith(".png");
-
-    return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.all(8),
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: isMe ? Colors.blue : Colors.grey[300],
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Column(
-          crossAxisAlignment:
-              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-          children: [
-            isImage
-                ? ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Image.network(
-                    "http://10.10.20.5:5000$content", // ✅ Append backend URL
-                    width: 200, // ✅ Set image size
-                    height: 200,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return const Center(child: CircularProgressIndicator());
-                    },
-                    errorBuilder:
-                        (context, error, stackTrace) =>
-                            const Icon(Icons.broken_image, size: 50),
-                  ),
-                )
-                : Text(
-                  content,
-                  style: TextStyle(color: isMe ? Colors.white : Colors.black),
-                ),
-            const SizedBox(height: 5),
-            Text(
-              time,
-              style: TextStyle(
-                color: isMe ? Colors.white70 : Colors.black54,
-                fontSize: 10,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

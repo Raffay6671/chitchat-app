@@ -13,7 +13,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 0; // Default index, change based on navigation
+
   final List<Widget> _screens = [
     const MessageScreen(),
     const CallsScreen(),
@@ -21,25 +22,23 @@ class _HomeScreenState extends State<HomeScreen> {
     const SettingsScreen(),
   ];
 
+  // Update the index when a tab is tapped
+  void _onTabTapped(int index) {
+    setState(() {
+      _selectedIndex = index; // Correctly updates the active tab
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Navigator(
-          onGenerateRoute: (settings) {
-            return MaterialPageRoute(
-              builder: (context) => _screens[_selectedIndex],
-            );
-          },
-        ),
+        child:
+            _screens[_selectedIndex], // Directly navigate based on selected index
       ),
       bottomNavigationBar: BottomNavBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
+        currentIndex: _selectedIndex, // Correctly highlight the selected tab
+        onTap: _onTabTapped, // This will update the active tab
       ),
     );
   }

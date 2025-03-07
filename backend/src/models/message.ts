@@ -8,8 +8,8 @@ interface MessageAttributes {
   receiverId: string;
   messageType: string;
   content: string;
+  seenBy?: string[]; // ✅ Track which users have seen this message
   createdAt?: Date;
-  updatedAt?: Date;
 }
 
 interface MessageCreationAttributes extends Optional<MessageAttributes, "id"> {}
@@ -23,8 +23,8 @@ class Message
   public receiverId!: string;
   public messageType!: string;
   public content!: string;
+  public seenBy?: string[];
   public createdAt?: Date;
-  public updatedAt?: Date;
 }
 
 Message.init(
@@ -51,6 +51,11 @@ Message.init(
     content: {
       type: DataTypes.TEXT,
       allowNull: false,
+    },
+    seenBy: {
+      type: DataTypes.ARRAY(DataTypes.STRING), // ✅ Store user IDs who have seen the message
+      allowNull: true,
+      defaultValue: [],
     },
   },
   {

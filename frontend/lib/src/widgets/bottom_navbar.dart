@@ -31,6 +31,20 @@ class BottomNavBar extends StatelessWidget {
       selectedItemColor: const Color(0xFF3D4A7A), // Active tab color
       unselectedItemColor: Colors.grey,
       type: BottomNavigationBarType.fixed,
+      selectedLabelStyle: const TextStyle(
+        fontFamily: 'Poppins',
+        fontWeight: FontWeight.w400, // Font weight 400
+        fontSize: 14, // Font size 16px
+        height: 1.0, // Line height 16px equivalent to 1.0 line height
+        letterSpacing: 0, // No letter-spacing
+      ),
+      unselectedLabelStyle: const TextStyle(
+        fontFamily: 'Poppins',
+        fontWeight: FontWeight.w400,
+        fontSize: 14,
+        height: 1.0,
+        letterSpacing: 0,
+      ),
       items: [
         _buildNavItem("assets/icons/message.svg", "Messages", 0, currentIndex),
         _buildNavItem("assets/icons/calls.svg", "Calls", 1, currentIndex),
@@ -60,8 +74,8 @@ class BottomNavBar extends StatelessWidget {
     return BottomNavigationBarItem(
       icon: SvgPicture.asset(
         iconPath,
-        height: 24,
-        width: 24,
+        height: 30,
+        width: 30,
         colorFilter: ColorFilter.mode(
           currentIndex == index ? const Color(0xFF3D4A7A) : Colors.grey,
           BlendMode.srcIn,

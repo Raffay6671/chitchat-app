@@ -81,16 +81,22 @@ class _MessageInputState extends State<MessageInput> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity, // ✅ Takes full screen width
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
+      decoration: const BoxDecoration(
+        color: Color.fromARGB(255, 255, 255, 255),
+        borderRadius: BorderRadius.zero, // ✅ No rounded corners anywhere
       ),
       child: Row(
         children: [
           // 📎 Attachment Icon (File Picker)
+          // 📎 Attachment Icon (File Picker)
           IconButton(
-            icon: const Icon(Icons.attach_file),
+            icon: Image.asset(
+              "assets/images/attachment.png", // ✅ Load the custom attachment icon
+              width: 24, // Adjust size if needed
+              height: 24,
+            ),
             onPressed: () => _pickImage(fromCamera: false),
           ),
 
@@ -104,27 +110,54 @@ class _MessageInputState extends State<MessageInput> {
                 hintStyle: TextStyle(color: Colors.grey.shade400),
                 border: InputBorder.none,
                 filled: true,
-                fillColor: Colors.grey.shade100,
+                fillColor: const Color(
+                  0xFFF2F7FB,
+                ), // ✅ Background color applied
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
+                  horizontal: 12, // Adjusted for balance
+                  vertical: 8, // Reduced height
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(20), // ✅ Rounded corners
                   borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(20), // ✅ Rounded corners
                   borderSide: BorderSide.none,
                 ),
+                suffixIcon: Padding(
+                  padding: const EdgeInsets.all(
+                    12,
+                  ), // Adjust for proper alignment
+                  child: Image.asset(
+                    "assets/images/notworking.png",
+                    width: 20,
+                    height: 10,
+                  ),
+                ),
               ),
+
               enabled: !_isUploading, // Disable input while uploading
             ),
           ),
 
           // 📷 Camera Icon
+          // Replace the Camera Icon with an Image from assets
           IconButton(
-            icon: const Icon(Icons.camera_alt),
+            icon: Image.asset(
+              "assets/images/camera.png", // Replace with the actual path of your image
+              width: 24, // Adjust size as needed
+              height: 24, // Adjust size as needed
+            ),
+            onPressed: () => _pickImage(fromCamera: true),
+          ),
+
+          IconButton(
+            icon: Image.asset(
+              "assets/images/microphone.png", // Replace with the actual path of your image
+              width: 24, // Adjust size as needed
+              height: 24, // Adjust size as needed
+            ),
             onPressed: () => _pickImage(fromCamera: true),
           ),
 

@@ -5,6 +5,7 @@ import '../../widgets/user_container.dart';
 import '../../constants/colors.dart';
 import '../../../services/auth_service.dart';
 import 'dart:developer';
+import 'package:flutter/widgets.dart'; // Import for navigation
 
 class MessageScreen extends StatefulWidget {
   const MessageScreen({super.key});
@@ -20,7 +21,18 @@ class _MessageScreenState extends State<MessageScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchAllUsers();
+    _checkAuthentication(); // Check authentication when the screen is loaded
+  }
+
+  Future<void> _checkAuthentication() async {
+    bool isAuthenticated = await AuthService.isAuthenticated(context);
+
+    if (!isAuthenticated) {
+      // If the user is not authenticated, navigate to the login screen
+      Navigator.pushReplacementNamed(context, '/login');
+    } else {
+      _fetchAllUsers();
+    }
   }
 
   Future<void> _fetchAllUsers() async {
